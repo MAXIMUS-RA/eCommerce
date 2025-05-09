@@ -1,0 +1,88 @@
+<?php
+
+use Core\Response;
+
+class AuthController
+{
+    function register()
+    {
+        if (empty($_POST)) {
+            $input = json_decode(file_get_contents('php://input'), true);
+            $email = $input['email'] ?? '';
+            $password = $input['password'] ?? '';
+            $name = $input['name'] ?? ''; 
+        } else {
+            $email = $_POST['email'] ?? '';
+            $password = $_POST['password'] ?? '';
+            $name = $_POST['name'] ?? ''; 
+        }
+
+
+        if (!$email || !$password || !$name) {
+            return new Response(['error' => 'Email, password, and name are required'], 400);
+        }
+
+        $existing = Users::all();
+        foreach ($existing as $user) {
+            if ($user['email'] === $email) {
+                return new Response(['error' => 'User already exists'], 409);
+            }
+        }
+
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+
+        error_log("Register: email=$email, password_hash=$hash (original_password_for_debug=$password)");
+
+        $result = Users::create([
+            'name' => $name, 
+            'email' => $email,
+            'password' => $hash
+        ]);
+
+        if ($result instanceof Response) {
+            return $result;
+        }
+
+        $id = $result;
+        error_log("Register: created user id=$id");
+
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+        $_SESSION['user_id'] = $id;
+
+        return new Response(['message' => 'Registered', 'id' => $id], 201);
+    }
+
+    public function login()
+    {
+        if (empty($_POST)) {
+            $input = json_decode(file_get_contents('php://input'), true);
+            $email = $input['email'] ?? '';
+            $password = $input['password'] ?? '';
+        } else {
+            $email = $_POST['email'] ?? '';
+            $password = $_POST['password'] ?? '';
+        }
+
+        if (!$email || !$password) {
+            return new Response(['error' => 'Email and password required'], 400);
+        }
+
+        $users = Users::all();
+        foreach ($users as $user) {
+            if ($user['email'] === $email && password_verify($password, $user['password'])) {
+                $_SESSION['user_id'] = $user['id'];
+                return new Response(['message' => 'Logged in',"test"=>$_SESSION['user_id']]);
+            }
+        }
+
+        return new Response(['error' => 'Invalid credentials'], 401);
+    }
+
+    public function logout()
+    {
+        session_destroy();
+        return new Response(['message' => 'Logged out']);
+    }
+}

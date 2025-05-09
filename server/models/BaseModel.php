@@ -26,19 +26,48 @@ abstract class BaseModel
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
-    static function create(array $data): int
+    public static function findBy(string $field, $value): ?array
     {
-        $fields       = array_keys($data);
-        $placeholders = array_fill(0, count($fields), '?');
-        $sql = sprintf(
-            "INSERT INTO %s (%s) VALUES (%s)",
-            static::$table,
-            implode(',', $fields),
-            implode(',', $placeholders)
-        );
+        if (!isset(static::$pdo) || !(static::$pdo instanceof \PDO)) {
+            error_log("CRITICAL ERROR in " . __METHOD__ . ": BaseModel::\$pdo is not a valid PDO object for table " . (isset(static::$table) ? static::$table : 'unknown') . ".");
+            // Повернення null тут може приховати проблему ініціалізації PDO.
+            // Розгляньте можливість кидання винятку, якщо це критична помилка конфігурації.
+            throw new \LogicException("BaseModel::\$pdo is not initialized in " . __METHOD__);
+        }
+
+        // Припускаємо, що $field є довіреною назвою стовпця і не потребує додаткової санітизації тут.
+        // Для PostgreSQL, якщо імена стовпців прості (нижній регістр, без спецсимволів), лапки не потрібні.
+        // Якщо вони можуть бути змішаного регістру або містити спеціальні символи, їх слід брати у подвійні лапки: "\"{$field}\""
+        // Щоб бути послідовним з Carts::findBy, який не бере $field в лапки, і припускаючи прості імена стовпців:
+        $sql = "SELECT * FROM " . static::$table . " WHERE {$field} = :value LIMIT 1";
+
+        // PDOException буде перехоплено роутером, якщо виникає помилка запиту
         $stmt = static::$pdo->prepare($sql);
-        $stmt->execute(array_values($data));
-        return (int) static::$pdo->lastInsertId();
+        $stmt->execute(['value' => $value]);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        return $result ?: null;
+    }
+
+    static function create(array $data)
+    {
+        try {
+            $fields       = array_keys($data);
+            $placeholders = array_fill(0, count($fields), '?');
+            $sql = sprintf(
+                "INSERT INTO %s (%s) VALUES (%s)",
+                static::$table,
+                implode(',', $fields),
+                implode(',', $placeholders)
+            );
+            $stmt = static::$pdo->prepare($sql);
+            $stmt->execute(array_values($data));
+            return (int) static::$pdo->lastInsertId();
+        } catch (\PDOException $e) {
+            error_log("DB CREATE ERROR: " . $e->getMessage());
+            // Повертаємо Response з помилкою
+            return new \Core\Response(['error' => 'Database error during user creation.', 'details' => $e->getMessage()], 500);
+        }
     }
 
     static function update(int $id, array $data): bool
