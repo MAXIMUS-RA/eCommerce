@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Card from "~/components/Card";
+import Card from "../components/Card";
+import { Link } from "react-router";
 
 interface Product {
   id: number;
   name: string;
-  image_path: string;
   description: string;
   price: number;
+  image_path: string; 
 }
 
 interface PaginatedProductsResponse {

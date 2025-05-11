@@ -1,24 +1,28 @@
 <?php
 error_reporting(E_ALL);
-ini_set('display_errors', 1); // Дуже важливо для розробки
+ini_set('display_errors', 1);
 
 error_log("INDEX.PHP TOP LEVEL TEST LOG - BEFORE ANYTHING ELSE");
-// die("Testing if index.php is reached and logs are working."); // Розкоментуйте для перевірки
 
-// Якщо попередній die() спрацював і лог з'явився, закоментуйте die() і продовжуйте
+header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Accept");
+
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 
 session_start();
 require_once 'config.php';
 require_once 'Autoloader.php';
 
-
 use Core\Router;
 use Core\Database;
 
-
 $db = Database::getInstance();
 BaseModel::setConnection($db->getConnection());
-
 
 $staticRoutesConfig = [
     'GET' => [
@@ -31,6 +35,7 @@ $staticRoutesConfig = [
         '/admin/products/create' => ['controller' => 'ProductsController', 'action' => 'create'],
         '/admin/categories' => ['controller' => 'CategoriesController', 'action' => 'index'],
         '/users' => ['controller' => 'UsersController', 'action' => 'index'],
+        '/auth/status' => ['controller' => 'AuthController', 'action' => 'status'],
     ],
     'POST' => [
         '/register' => ['controller' => 'AuthController', 'action' => 'register'],
@@ -41,6 +46,9 @@ $staticRoutesConfig = [
         '/cart/update' => ['controller' => 'CartController', 'action' => 'updateItem'],
         '/cart/remove' => ['controller' => 'CartController', 'action' => 'removeItem'],
         '/cart/clear' => ['controller' => 'CartController', 'action' => 'clearCart'],
+        '/auth/register' => ['controller' => 'AuthController', 'action' => 'register'],
+        '/auth/login' => ['controller' => 'AuthController', 'action' => 'login'],
+        '/auth/logout' => ['controller' => 'AuthController', 'action' => 'logout'],
     ]
 ];
 

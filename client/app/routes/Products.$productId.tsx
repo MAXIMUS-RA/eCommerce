@@ -1,117 +1,193 @@
-import { useLoaderData, useParams, Link as RemixLink } from "@remix-run/react";
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node"; // або cloudflare/next
 import axios from "axios";
+import React, { use, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams, Link } from "react-router";
+import { addToCart } from "~/redux/slices/cartSlice";
+import type { AppDispatch, RootState } from "~/redux/store";
 
-// Інтерфейс для одного продукту (узгодьте з вашим API)
-interface ProductDetails {
+interface Product {
   id: number;
   name: string;
   description: string;
+  image_path: string;
   price: number;
-  image_path: string; // Переконайтеся, що це поле є у відповіді API
-  // ... інші поля, якщо є
 }
 
-// Loader функція для завантаження даних на сервері
-export async function loader({
-  params,
-}: LoaderFunctionArgs): Promise<ProductDetails> {
-  const productId = params.productId; // productId береться з назви файлу ($productId)
-  if (!productId) {
-    throw new Response("Product ID not found in URL", { status: 400 });
-  }
+function ProductDetailPage() {
+  const { productId } = useParams<{ productId: string }>();
+  const [product, setProduct] = useState<Product>();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState<number>(1);
+  const [addedToCart, setAddedToCart] = useState<boolean>(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const cartItems = useSelector((state: RootState) => state.cart.items);
 
-  try {
-    const response = await axios.get<ProductDetails>(
-      `http://localhost:8000/products/${productId}`
+  useEffect(() => {
+    const fetchProductDetail = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await axios.get<Product>(
+          `http://localhost:8000/products/${productId}`
+        );
+        setProduct(response.data);
+      } catch (err) {
+        console.error("Error fetching product details:", err);
+        setError("Помилка завантаження товару. Спробуйте пізніше.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductDetail();
+  }, [productId]);
+
+  const incrementQuantity = () => setQuantity((prev) => prev + 1);
+  const decrementQuantity = () =>
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    setQuantity(isNaN(value) || value < 1 ? 1 : value);
+  };
+
+  const handleAddToCart = () => {
+    if (product) {
+      const itemToAdd = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: quantity, 
+        image_path: product.image_path,
+      };
+      dispatch(addToCart(itemToAdd));
+      console.log(`Додано в кошик: ${product?.name}, кількість: ${quantity}`);
+    }
+    else {
+      console.error("Неможливо додати в кошик: дані товару не завантажені.");
+    }
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 3000);
+    
+  };
+
+  if (loading) {
+    return (
+      <div className="py-8 px-4 max-w-6xl mx-auto">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Завантаження...</p>
+        </div>
+      </div>
     );
-
-    if (
-      !response.data ||
-      (typeof response.data === "object" &&
-        Object.keys(response.data).length === 0)
-    ) {
-      // Якщо API повертає порожній об'єкт або null для неіснуючого продукту
-      throw new Response("Product not found", { status: 404 });
-    }
-    return response.data;
-  } catch (error: any) {
-    console.error(`Failed to load product ${productId}:`, error.message);
-    if (axios.isAxiosError(error) && error.response) {
-      // Якщо API повернуло помилку (наприклад, 404)
-      throw new Response(
-        error.response.data?.message || "Error fetching product from API",
-        { status: error.response.status }
-      );
-    }
-    // Загальна помилка сервера або мережі
-    throw new Response("Failed to load product data", { status: 500 });
   }
-}
 
-// Meta функція для SEO
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  if (!data) {
-    // data може бути undefined, якщо loader кинув помилку до повернення даних
-    return [{ title: "Product Not Found" }];
+  if (error) {
+    return (
+      <div className="py-8 px-4 max-w-6xl mx-auto">
+        <div className="text-center text-red-500">{error}</div>
+        <div className="mt-4 text-center">
+          <Link to="/products" className="text-indigo-600 hover:underline">
+            Повернутися до списку товарів
+          </Link>
+        </div>
+      </div>
+    );
   }
-  return [
-    { title: `${data.name} - Your Store Name` },
-    {
-      name: "description",
-      content: data.description
-        ? data.description.substring(0, 150)
-        : "Product details.",
-    },
-  ];
-};
 
-// Назва компонента має бути валідною
-export default function ProductDetailPage() {
-  const product = useLoaderData<ProductDetails>(); // Отримуємо дані з loader
-
-  // Якщо loader кинув помилку, ErrorBoundary буде відрендерений замість цього компонента
+  if (!product) {
+    return (
+      <div className="py-8 px-4 max-w-6xl mx-auto">
+        <div className="text-center text-red-500">Товар не знайдено</div>
+        <div className="mt-4 text-center">
+          <Link to="/products" className="text-indigo-600 hover:underline">
+            Повернутися до списку товарів
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      <div className="bg-white shadow-xl rounded-lg overflow-hidden md:flex">
-        <div className="md:w-1/2 p-4">
-          <img
-            src={
-              product.image_path ||
-              `https://via.placeholder.com/600x400.png?text=${encodeURIComponent(
-                product.name
-              )}`
-            }
-            alt={product.name}
-            className="w-full h-auto max-h-[500px] object-contain rounded-lg" // object-contain щоб бачити все зображення
-          />
+    <div className="py-8 px-4 max-w-6xl mx-auto">
+      <div className="mb-4">
+        <Link to="/products" className="text-indigo-600 hover:underline">
+          ← Назад до списку товарів
+        </Link>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* Product Image */}
+        <div className="md:w-1/2">
+          <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border mb-4">
+            {product.image_path ? (
+              <img
+                src={product.image_path}
+                alt={product.name}
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-500">
+                Немає зображення
+              </div>
+            )}
+          </div>
         </div>
-        <div className="p-6 md:w-1/2 flex flex-col">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3">
-            {product.name}
-          </h1>
-          <p className="text-gray-600 mb-4 leading-relaxed flex-grow">
-            {product.description || "No description available."}
+
+        <div className="md:w-1/2">
+          <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
+          <p className="text-2xl font-semibold text-indigo-600 mb-4">
+            {product.price} грн{" "}
+            {quantity > 1 &&
+              `× ${quantity} = ${(product.price * quantity).toFixed(2)} грн`}
           </p>
-          <div className="mt-auto">
-            {" "}
-            {/* Цей div притисне ціну та кнопку до низу */}
-            <p className="text-3xl font-semibold text-indigo-600 mb-6">
-              ${product.price.toFixed(2)}
-            </p>
+
+          <div className="mb-6">
+            <h2 className="text-lg font-medium mb-2">Опис</h2>
+            <p className="text-gray-600">{product.description}</p>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center space-x-4">
+              <label htmlFor="quantity" className="font-medium">
+                Кількість:
+              </label>
+              <div className="flex items-center">
+                <button
+                  onClick={decrementQuantity}
+                  className="px-3 py-1 border rounded-l-lg bg-gray-100 hover:bg-gray-200"
+                >
+                  -
+                </button>
+                <input
+                  id="quantity"
+                  type="number"
+                  min="1"
+                  value={quantity}
+                  onChange={handleQuantityChange}
+                  className="w-16 text-center border-t border-b py-1"
+                />
+                <button
+                  onClick={incrementQuantity}
+                  className="px-3 py-1 border rounded-r-lg bg-gray-100 hover:bg-gray-200"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
             <button
-              className="w-full px-6 py-3 border rounded-lg bg-indigo-600 text-white font-semibold text-lg duration-300 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
-              // onClick={() => addToCart(product.id)} // Додайте логіку додавання в кошик
+              onClick={handleAddToCart}
+              className="w-full px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-colors"
             >
               Додати в кошик
             </button>
-            <RemixLink
-              to="/products"
-              className="block text-center mt-4 text-indigo-600 hover:underline"
-            >
-              Повернутися до товарів
-            </RemixLink>
+
+            {addedToCart && (
+              <div className="text-center p-2 rounded bg-green-100 text-green-700">
+                Товар додано в кошик!
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -119,22 +195,4 @@ export default function ProductDetailPage() {
   );
 }
 
-// Важливо додати ErrorBoundary для обробки помилок, які може кинути loader
-export function ErrorBoundary() {
-  // const error = useRouteError(); // Можна отримати деталі помилки
-  // if (isRouteErrorResponse(error)) { ... } // Для більш детальної обробки
-  return (
-    <div className="container mx-auto p-6 text-center">
-      <h1 className="text-2xl font-bold text-red-600 mb-4">
-        Ой, сталася помилка!
-      </h1>
-      <p className="text-gray-700 mb-4">
-        Не вдалося завантажити інформацію про товар. Можливо, такого товару не
-        існує, або виникла проблема з сервером.
-      </p>
-      <RemixLink to="/products" className="text-indigo-600 hover:underline">
-        Повернутися до списку товарів
-      </RemixLink>
-    </div>
-  );
-}
+export default ProductDetailPage;
