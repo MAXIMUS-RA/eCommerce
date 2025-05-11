@@ -57,7 +57,6 @@ export default function Header() {
           <span className="text-xl font-bold text-gray-800">eCommerce</span>
         </Link>
 
-        {/* Desktop Menu */}
         <ul className="hidden md:flex items-center space-x-4">
           <li>
             <Link

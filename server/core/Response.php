@@ -12,7 +12,7 @@ class Response
     {
         $this->data = $data;
         $this->statusCode = $statusCode;
-        // $this->setHeader('Content-Type', 'application/json');
+        $this->setHeader('Content-Type', 'application/json');
     }
 
     public function setHeader(string $name, string $value): self
@@ -25,6 +25,18 @@ class Response
     {
         if (headers_sent($file, $line)) {
             error_log("Headers already sent in {$file} on line {$line}. Cannot send JSON response properly.");
+        }
+        header("Access-Control-Allow-Origin: http://localhost:5173");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+        header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+
+        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+            http_response_code(204); 
+            exit;
+        }
+
+        if (!isset($this->headers['Content-Type'])) {
+            header('Content-Type: application/json');
         }
 
         foreach ($this->headers as $name => $value) {

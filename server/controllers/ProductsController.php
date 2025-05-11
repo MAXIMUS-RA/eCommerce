@@ -12,8 +12,15 @@ class ProductsController
 
     public function index()
     {
-        $products = Product::all();
-        return new Response($products);
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $perPage = isset($_GET['per_page']) ? (int)$_GET['per_page'] : 10; 
+
+        if ($page < 1) $page = 1;
+        if ($perPage < 1) $perPage = 1;
+        if ($perPage > 100) $perPage = 100; 
+
+        $paginatedProducts = Product::paginate($page, $perPage);
+        return new Response($paginatedProducts);
     }
 
     public function show($params = [])
