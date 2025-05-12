@@ -1,52 +1,39 @@
-import { useState } from "react";
-import type {FormEvent} from "react";
-import { useNavigate } from "react-router"; // Змінено імпорт
-import axios from "axios";
-// import { useAuth } from "../contexts/AuthContext"; // Або ваш шлях
+import { useState, useEffect } from "react";
+import type { FormEvent } from "react";
+import { useNavigate, useOutletContext } from "react-router";
+import type { AuthOutletContext } from "../root";
 
 const API_URL = "http://localhost:8000";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  // const { login } = useAuth();
+  const context = useOutletContext<AuthOutletContext>();
+
+  if (!context) {
+    console.error("Login page did not receive auth context.");
+    navigate("/");
+    return null;
+  }
+  const { handleLogin, loading, authError, isAuthenticated } = context;
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    setError(null);
-
-    try {
-      await axios.post(
-        `${API_URL}/auth/login`,
-        { email, password },
-        { withCredentials: true }
-      );
-
-      // Оновлення стану через useAuth хук в Header.tsx відбудеться автоматично
-      // завдяки useEffect, який перевіряє /auth/status
-      navigate("/");
-    } catch (err: any) {
-      if (axios.isAxiosError(err) && err.response) {
-        setError(
-          err.response.data.error || `Помилка входу: ${err.response.statusText}`
-        );
-      } else {
-        setError(
-          "Не вдалося підключитися до сервера або сталася інша помилка."
-        );
-      }
-      console.error("Login error:", err);
-    }
+    await handleLogin({ email, password });
   };
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-center mb-6">Вхід</h2>
       <form onSubmit={handleSubmit}>
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-        {/* ... решта форми ... */}
+        {authError && <p className="text-red-500 text-sm mb-4">{authError}</p>}
         <div className="mb-4">
           <label
             htmlFor="email"
@@ -81,9 +68,10 @@ export default function LoginPage() {
         </div>
         <button
           type="submit"
+          disabled={loading}
           className="w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
-          Увійти
+          {loading ? "Вхід..." : "Увійти"}
         </button>
       </form>
     </div>

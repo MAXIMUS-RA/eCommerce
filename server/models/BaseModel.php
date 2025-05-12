@@ -78,18 +78,11 @@ abstract class BaseModel
     {
         if (!isset(static::$pdo) || !(static::$pdo instanceof \PDO)) {
             error_log("CRITICAL ERROR in " . __METHOD__ . ": BaseModel::\$pdo is not a valid PDO object for table " . (isset(static::$table) ? static::$table : 'unknown') . ".");
-            // Повернення null тут може приховати проблему ініціалізації PDO.
-            // Розгляньте можливість кидання винятку, якщо це критична помилка конфігурації.
             throw new \LogicException("BaseModel::\$pdo is not initialized in " . __METHOD__);
         }
 
-        // Припускаємо, що $field є довіреною назвою стовпця і не потребує додаткової санітизації тут.
-        // Для PostgreSQL, якщо імена стовпців прості (нижній регістр, без спецсимволів), лапки не потрібні.
-        // Якщо вони можуть бути змішаного регістру або містити спеціальні символи, їх слід брати у подвійні лапки: "\"{$field}\""
-        // Щоб бути послідовним з Carts::findBy, який не бере $field в лапки, і припускаючи прості імена стовпців:
         $sql = "SELECT * FROM " . static::$table . " WHERE {$field} = :value LIMIT 1";
 
-        // PDOException буде перехоплено роутером, якщо виникає помилка запиту
         $stmt = static::$pdo->prepare($sql);
         $stmt->execute(['value' => $value]);
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
