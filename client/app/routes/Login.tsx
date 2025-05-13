@@ -1,39 +1,30 @@
 import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
-import { useNavigate, useOutletContext } from "react-router";
-import type { AuthOutletContext } from "../root";
-
-const API_URL = "http://localhost:8000";
+import { useNavigate } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import { login, selectAuth } from "../redux/slices/authSlice";
+import type { AppDispatch } from "../redux/store";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const dispatch = useDispatch<AppDispatch>();
+  const { isAuthenticated, loading, error } = useSelector(selectAuth);
   const navigate = useNavigate();
-  const context = useOutletContext<AuthOutletContext>();
-
-  if (!context) {
-    console.error("Login page did not receive auth context.");
-    navigate("/");
-    return null;
-  }
-  const { handleLogin, loading, authError, isAuthenticated } = context;
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/");
-    }
+    if (isAuthenticated) navigate("/");
   }, [isAuthenticated, navigate]);
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    await handleLogin({ email, password });
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    dispatch(login({ email, password }));
   };
-
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-center mb-6">Вхід</h2>
-      <form onSubmit={handleSubmit}>
-        {authError && <p className="text-red-500 text-sm mb-4">{authError}</p>}
+      <form onSubmit={onSubmit}>
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         <div className="mb-4">
           <label
             htmlFor="email"
