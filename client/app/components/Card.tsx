@@ -22,6 +22,7 @@ function Card(props: CardProduct) {
         price: props.price,
         quantity: 1,               
         image_path: props.image, 
+        description:props.description
       }))
     }
   

@@ -30,6 +30,8 @@ export const fetchCurrentUser = createAsyncThunk<
   void,
   { rejectValue: null }
 >("auth/fetchCurrentUser", async (_, { rejectWithValue }) => {
+  // "_" тут — це перший аргумент payload, який не використовується.
+  // createAsyncThunk приймає два аргументи: payload (тут не потрібен, тому "_") і thunkAPI.
   try {
     const res = await axios.get<{ user: User }>(`${API}/auth/status`);
     return res.data.user;

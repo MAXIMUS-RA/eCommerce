@@ -13,6 +13,7 @@ import type { RootState, AppDispatch } from "./redux/store";
 import { fetchCurrentUser, selectAuth, logout } from "./redux/slices/authSlice";
 import Header from "./components/Header";
 import './app.css'
+import { fetchCart } from "./redux/slices/cartSlice";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -37,6 +38,12 @@ function AppContent() {
   useEffect(() => {
     dispatch(fetchCurrentUser());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (isAuthenticated) { // Додано умову
+      dispatch(fetchCart());
+    }
+  }, [isAuthenticated, dispatch]);
 
   if (loading) {
     return (

@@ -8,4 +8,9 @@ export default defineConfig({
   ssr: {
     noExternal: ["@reduxjs/toolkit"],
   },
+  server: {
+    hmr: {
+      overlay: false
+    }
+  }
 });

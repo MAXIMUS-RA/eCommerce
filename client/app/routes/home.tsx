@@ -1,5 +1,5 @@
-import type { Route } from "./+types/home";
-import Test from "~/components/test";
+import type { Route } from "./+types/Home";
+import Test from "~/components/Test";
 
 export function meta({}: Route.MetaArgs) {
   return [

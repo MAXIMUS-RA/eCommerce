@@ -25,8 +25,8 @@ class CartItems extends BaseModel
             error_log("CRITICAL ERROR in " . __METHOD__ . " (CartItems.php): BaseModel::\$pdo is not a valid PDO object.");
             return []; 
         }
-        $sql = "SELECT ci.id as cart_item_id, ci.quantity,
-                       p.id as product_id, p.name, p.price as current_price, p.image_path
+        $sql = "SELECT ci.id as id, ci.quantity,
+                       p.id as product_id, p.name,p.description as description, p.price as price, p.image_path
                 FROM " . static::$table . " ci
                 JOIN products p ON ci.product_id = p.id
                 WHERE ci.cart_id = :cart_id";
