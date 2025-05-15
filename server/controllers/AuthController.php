@@ -10,11 +10,11 @@ class AuthController
             $input = json_decode(file_get_contents('php://input'), true);
             $email = $input['email'] ?? '';
             $password = $input['password'] ?? '';
-            $name = $input['name'] ?? ''; 
+            $name = $input['name'] ?? '';
         } else {
             $email = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
-            $name = $_POST['name'] ?? ''; 
+            $name = $_POST['name'] ?? '';
         }
 
 
@@ -34,7 +34,7 @@ class AuthController
         error_log("Register: email=$email, password_hash=$hash (original_password_for_debug=$password)");
 
         $result = Users::create([
-            'name' => $name, 
+            'name' => $name,
             'email' => $email,
             'password' => $hash
         ]);
@@ -70,12 +70,20 @@ class AuthController
             return new Response(['error' => 'Email and password required'], 400);
         }
 
-        $users = Users::all();
-        foreach ($users as $user) {
-            if ($user['email'] === $email && password_verify($password, $user['password'])) {
-                $_SESSION['user_id'] = $user['id'];
-                return new Response(['message' => 'Logged in', "test" => $_SESSION['user_id']]);
+        $user = Users::getByEmail($email);
+        var_dump($user);
+
+        // Check if user was found
+        if (!$user) {
+            return new Response(['error' => 'Invalid credentials'], 401);
+        }
+
+        if (password_verify($password, $user['password'])) {
+            if (session_status() == PHP_SESSION_NONE) {
+                session_start();
             }
+            $_SESSION['user_id'] = $user['id']; // Use 'id' instead of 'user_id'
+            return new Response(['message' => 'Logged in', "user" => $user]);
         }
 
         return new Response(['error' => 'Invalid credentials'], 401);

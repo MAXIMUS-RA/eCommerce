@@ -12,6 +12,7 @@ import { store } from "./redux/store";
 import type { RootState, AppDispatch } from "./redux/store";
 import { fetchCurrentUser, selectAuth, logout } from "./redux/slices/authSlice";
 import Header from "./components/Header";
+import './app.css'
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (

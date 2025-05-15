@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
-import { useNavigate, useOutletContext } from "react-router";
-import type { AuthOutletContext } from "../root";
+import { useDispatch,useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "~/redux/store";
+import { login, register, selectAuth } from "../redux/slices/authSlice";
+import { useNavigate } from "react-router";
+
 
 const API_URL = "http://localhost:8000";
 
@@ -9,32 +12,24 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const dispatch = useDispatch<AppDispatch>()
+  const { isAuthenticated, loading, error } = useSelector(selectAuth);
   const navigate = useNavigate();
-  const context = useOutletContext<AuthOutletContext>();
+  
 
-  if (!context) {
-    console.error("Register page did not receive auth context.");
-    navigate("/");
-    return null;
+
+
+  const handleSubmit = (e:FormEvent)=>{
+    e.preventDefault();
+    dispatch(register({name,email,password}))
+    navigate('/')
+    
   }
-  const { handleRegister, loading, authError, isAuthenticated } = context;
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/");
-    }
-  }, [isAuthenticated, navigate]);
-
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    await handleRegister({ name, email, password });
-  };
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-center mb-6">Реєстрація</h2>
       <form onSubmit={handleSubmit}>
-        {authError && <p className="text-red-500 text-sm mb-4">{authError}</p>}
         <div className="mb-4">
           <label
             htmlFor="name"
