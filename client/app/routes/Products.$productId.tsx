@@ -1,8 +1,9 @@
 import axios from "axios";
 import React, { use, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams, Link } from "react-router";
-import { addToCart } from "~/redux/slices/cartSlice";
+import { useParams, Link, useNavigate } from "react-router";
+import { selectAuth } from "~/redux/slices/authSlice";
+import { addToCart, addToCartAPI } from "~/redux/slices/cartSlice";
 import type { AppDispatch, RootState } from "~/redux/store";
 
 interface Product {
@@ -11,6 +12,7 @@ interface Product {
   description: string;
   image_path: string;
   price: number;
+  stock: number;
 }
 
 function ProductDetailPage() {
@@ -21,7 +23,8 @@ function ProductDetailPage() {
   const [quantity, setQuantity] = useState<number>(1);
   const [addedToCart, setAddedToCart] = useState<boolean>(false);
   const dispatch = useDispatch<AppDispatch>();
-  const cartItems = useSelector((state: RootState) => state.cart.items);
+  const { isAuthenticated } = useSelector(selectAuth);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProductDetail = async () => {
@@ -52,23 +55,23 @@ function ProductDetailPage() {
   };
 
   const handleAddToCart = () => {
+    if (!isAuthenticated) {
+      alert("Ви маєте ввійти в аккаунт, щоб додати товар у кошик.");
+      navigate("/login");
+      return;
+    }
     if (product) {
       const itemToAdd = {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: quantity, 
-        image_path: product.image_path,
+        product_id: product.id,
+        quantity: quantity,
       };
-      dispatch(addToCart(itemToAdd));
+      dispatch(addToCartAPI(itemToAdd));
       console.log(`Додано в кошик: ${product?.name}, кількість: ${quantity}`);
-    }
-    else {
+    } else {
       console.error("Неможливо додати в кошик: дані товару не завантажені.");
     }
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 3000);
-    
   };
 
   if (loading) {
@@ -146,8 +149,8 @@ function ProductDetailPage() {
             <h2 className="text-lg font-medium mb-2">Опис</h2>
             <p className="text-gray-600">{product.description}</p>
           </div>
-
-          <div className="space-y-4">
+          <label htmlFor="">Кількість на складі: {product.stock}</label>
+          <div className="space-y-4 mt-2">
             <div className="flex items-center space-x-4">
               <label htmlFor="quantity" className="font-medium">
                 Кількість:
@@ -178,9 +181,10 @@ function ProductDetailPage() {
 
             <button
               onClick={handleAddToCart}
-              className="w-full px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-colors"
+              className="w-full px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-colors disabled:opacity-50"
+              disabled={product.stock <= 0}
             >
-              Додати в кошик
+              {product.stock > 0 ? "Додати в кошик" : "Немає в наявності"}
             </button>
 
             {addedToCart && (

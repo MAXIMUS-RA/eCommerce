@@ -40,7 +40,7 @@ function AppContent() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (isAuthenticated) { // Додано умову
+    if (isAuthenticated) { 
       dispatch(fetchCart());
     }
   }, [isAuthenticated, dispatch]);

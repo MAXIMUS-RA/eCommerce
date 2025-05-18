@@ -18,12 +18,12 @@ interface HeaderProps {
 export default function Header({ isAuthenticated, user, onLogout }: HeaderProps) {
  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
  const cartNumber = useSelector((state:RootState)=>state.cart.items);
-  const logoUrl = "/LOGO.png"; // Переконайтеся, що шлях правильний
+  const logoUrl = "/LOGO.png";
 
   const handleLogoutClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     onLogout();
-    setMobileMenuOpen(false); // Закрити мобільне меню після виходу
+    setMobileMenuOpen(false); 
   };
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
@@ -36,7 +36,6 @@ export default function Header({ isAuthenticated, user, onLogout }: HeaderProps)
           <span className="text-xl font-bold text-gray-800">eCommerce</span>
         </Link>
 
-        {/* Desktop Menu */}
         <ul className="hidden md:flex items-center space-x-4">
           <li>
             <Link
@@ -63,11 +62,11 @@ export default function Header({ isAuthenticated, user, onLogout }: HeaderProps)
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               Cart
-              {/* {isAuthenticated && (cartNumber.length > 0) && (
+              {isAuthenticated && (cartNumber.length > 0) && (
                 <span className="ml-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
                   {cartNumber.length}
                 </span>
-              )} */}
+              )}
             </Link>
           </li>
           {isAuthenticated ? (

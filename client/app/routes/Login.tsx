@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { login, selectAuth } from "../redux/slices/authSlice";
+import { fetchCurrentUser, login, selectAuth } from "../redux/slices/authSlice";
 import type { AppDispatch } from "../redux/store";
 
 export default function LoginPage() {
@@ -16,14 +16,21 @@ export default function LoginPage() {
     if (isAuthenticated) navigate("/");
   }, [isAuthenticated, navigate]);
 
-  const onSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    dispatch(login({ email, password }));
-  };
+  const handleLogin = async (e:FormEvent) => {
+  try {
+    e.preventDefault()
+    await dispatch(login({ email, password })).unwrap();
+    // Після успішного входу одразу отримуємо дані користувача
+    await dispatch(fetchCurrentUser());
+    navigate("/");  // Перенаправляємо на головну сторінку
+  } catch (error) {
+    throw error
+  }
+};
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-center mb-6">Вхід</h2>
-      <form onSubmit={onSubmit}>
+      <form onSubmit={handleLogin}>
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         <div className="mb-4">
           <label

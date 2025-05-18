@@ -1,6 +1,11 @@
 import React from "react";
 import { useDispatch } from "react-redux";
-import { updateCart, removeFromCart } from "~/redux/slices/cartSlice";
+import {
+  updateCart,
+  removeFromCart,
+  removeFromCartAPI,
+  updateCartAPI,
+} from "~/redux/slices/cartSlice";
 import type { AppDispatch } from "~/redux/store";
 
 interface CartItemProps {
@@ -10,6 +15,7 @@ interface CartItemProps {
   description?: string;
   price: number;
   quantity: number;
+  product_id:number
 }
 
 export default function CartItem({
@@ -19,6 +25,7 @@ export default function CartItem({
   description,
   price,
   quantity,
+  product_id,
 }: CartItemProps) {
   const dispatch = useDispatch<AppDispatch>();
 
@@ -68,8 +75,8 @@ export default function CartItem({
             onClick={() => {
               // Decrease quantity logic here
               dispatch(
-                updateCart({
-                  id: id,
+                updateCartAPI({
+                  product_id: product_id,
                   quantity: quantity - 1,
                 })
               );
@@ -104,8 +111,8 @@ export default function CartItem({
             className="text-gray-500 duration-300 rounded-4xl hover:text-gray-700 p-1 hover:bg-gray-300 disabled:opacity-50 "
             onClick={() => {
               dispatch(
-                updateCart({
-                  id: id,
+                updateCartAPI({
+                  product_id: product_id,
                   quantity: quantity + 1,
                 })
               );
@@ -149,8 +156,11 @@ export default function CartItem({
           className="text-red-500 hover:text-red-700"
           title="Remove item"
           onClick={() => {
-            // Remove item logic here
-            dispatch(removeFromCart(id));
+            if (id !== undefined && id !== null) {
+              dispatch(removeFromCartAPI( {product_id} ));
+            } else {
+              console.error("Cannot remove item: invalid ID");
+            }
           }}
         >
           <svg

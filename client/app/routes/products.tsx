@@ -2,14 +2,16 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Card from "../components/Card";
 import { Link } from "react-router";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { selectAuth } from "~/redux/slices/authSlice";
 
 interface Product {
   id: number;
   name: string;
   description: string;
   price: number;
-  image_path: string; 
+  image_path: string;
+  stock: number;
 }
 
 interface PaginatedProductsResponse {
@@ -27,6 +29,7 @@ function Products() {
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated, user } = useSelector(selectAuth);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -155,31 +158,39 @@ function Products() {
   return (
     <div className="py-8 px-4">
       <h1 className="text-3xl font-bold text-center mb-8">Наші Товари</h1>
-      {error && !loading && (
-        <div className="text-center pb-4 text-red-500">{error}</div>
-      )}
-      {loading && (
-        <div className="text-center pb-4 text-blue-500">Оновлення...</div>
-      )}
 
-      {products.length === 0 && !loading ? (
-        <p className="text-center text-gray-500">Товари не знайдено.</p>
-      ) : (
-        <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
-          {products.map((product) => (
-            <li key={product.id} className="flex">
-              <Card
-                id={product.id}
-                name={product.name}
-                description={product.description}
-                price={product.price}
-                image={product.image_path}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
+      {/* Вміст продуктів з індикатором завантаження */}
+      <div className="relative min-h-[200px]">
+        {/* Напівпрозорий оверлей під час завантаження */}
+        {loading && (
+          <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-10">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          </div>
+        )}
 
+        {/* Список продуктів, який завжди видимий */}
+        {products.length === 0 && !loading ? (
+          <p className="text-center text-gray-500">Товари не знайдено.</p>
+        ) : (
+          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+            {products.map((product) => (
+              <li key={product.id} className="flex">
+                <Card
+                  id={product.id}
+                  name={product.name}
+                  description={product.description}
+                  price={product.price}
+                  image={product.image_path}
+                  stock={product.stock}
+                  isAuthenticated={isAuthenticated}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Пагінація */}
       {totalPages > 1 && (
         <div className="flex justify-center items-center mt-8">
           <button

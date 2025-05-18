@@ -53,6 +53,7 @@ export default function Cart() {
                 image_path={element.image_path}
                 name={element.name}
                 description={element.description}
+                product_id={element.product_id}
               ></CartItem>
             ))}
           </div>

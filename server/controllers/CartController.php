@@ -64,6 +64,14 @@ class CartController
         if (!$product) {
             return new Response(['error' => 'Product not found.'], 404);
         }
+        if ($product['stock'] < $quantity) {
+            return new Response(['error' => 'Not enough stock available.'], 400);
+        }
+        if ($product) {
+            $newStock = $product['stock'] - $quantity;
+            Product::update($productId, ['stock' => $newStock]);
+        }
+
 
         $existingCartItem = CartItems::findByCartAndProduct($cartId, $productId);
 
@@ -101,7 +109,15 @@ class CartController
         if (!$cartItem) {
             return new Response(['error' => 'Product not found in cart.'], 404);
         }
-
+        $product = Product::find($productId);
+        $quantityDiff = $newQuantity - $cartItem['quantity'];
+        if ($quantityDiff > 0 && $product['stock'] < $quantityDiff) {
+            return new Response(['error' => 'Not enough stock available.'], 400);
+        }
+        if ($product) {
+            $newStock = $product['stock'] - $quantityDiff;
+            Product::update($productId, ['stock' => $newStock]);
+        }
         if ($newQuantity <= 0) {
             CartItems::delete($cartItem['id']); // Використовуємо BaseModel::delete
         } else {
@@ -130,6 +146,14 @@ class CartController
         if (!$cartItem) {
             return new Response(['error' => 'Product not found in cart.'], 404);
         }
+
+
+        $product = Product::find($productId);
+        if ($product) {
+            $newStock = $product['stock'] + $cartItem['quantity'];
+            Product::update($productId, ['stock' => $newStock]);
+        }
+
 
         CartItems::delete($cartItem['id']); // Використовуємо BaseModel::delete
         return $this->viewCart();
