@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import Card from "../components/Card";
-import { Link } from "react-router";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { selectAuth } from "~/redux/slices/authSlice";
+import SkeletonCard from "~/components/SkeletonCard";
+import { Skeleton } from "~/components/ui/skeleton";
 
 interface Product {
   id: number;
@@ -29,7 +30,7 @@ function Products() {
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { isAuthenticated, user } = useSelector(selectAuth);
+  const { isAuthenticated } = useSelector(selectAuth);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -148,7 +149,30 @@ function Products() {
   };
 
   if (loading && products.length === 0) {
-    return <div className="text-center py-10">Завантаження товарів...</div>;
+    return (
+      <div className="py-8 px-4">
+        <div className="w-full flex justify-center p-2">
+          <Skeleton className="h-8 w-1/3 mb-3 rounded bg-gray-200"></Skeleton>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+          {Array.from({ length: itemsPerPage }).map((_, index) => (
+            <SkeletonCard key={index} />
+          ))}
+        </div>
+        <div className="flex justify-center items-center mt-8">
+          <div className="px-4 py-2 mx-1 border rounded-2xl bg-gray-200 animate-pulse h-10 w-24"></div>
+          {Array.from({ length: Math.min(totalPages, 5) || 3 }).map(
+            (_, index) => (
+              <Skeleton
+                key={index}
+                className="px-3 py-1 mx-1 rounded bg-gray-200 animate-pulse h-8 w-8"
+              ></Skeleton>
+            )
+          )}
+          <Skeleton className="px-4 py-2 mx-1 border rounded-2xl bg-gray-200 animate-pulse h-10 w-24"></Skeleton>
+        </div>
+      </div>
+    );
   }
 
   if (error && products.length === 0) {
@@ -159,16 +183,7 @@ function Products() {
     <div className="py-8 px-4">
       <h1 className="text-3xl font-bold text-center mb-8">Наші Товари</h1>
 
-      {/* Вміст продуктів з індикатором завантаження */}
       <div className="relative min-h-[200px]">
-        {/* Напівпрозорий оверлей під час завантаження */}
-        {loading && (
-          <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-10">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-          </div>
-        )}
-
-        {/* Список продуктів, який завжди видимий */}
         {products.length === 0 && !loading ? (
           <p className="text-center text-gray-500">Товари не знайдено.</p>
         ) : (

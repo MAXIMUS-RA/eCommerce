@@ -20,9 +20,8 @@ export default function LoginPage() {
   try {
     e.preventDefault()
     await dispatch(login({ email, password })).unwrap();
-    // Після успішного входу одразу отримуємо дані користувача
     await dispatch(fetchCurrentUser());
-    navigate("/");  // Перенаправляємо на головну сторінку
+    navigate("/");  
   } catch (error) {
     throw error
   }

@@ -2,7 +2,6 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
 import axios from "axios";
-import { data } from "react-router";
 
 axios.defaults.withCredentials = true;
 const API = "http://localhost:8000";
@@ -57,7 +56,6 @@ export const addToCartAPI = createAsyncThunk<
       `${API}/cart/add`,
       creds
     );
-    // Assuming the API returns the updated cart as an array, return the last added/updated item
     const items = res.data.cart_items;
     if (!items || items.length === 0) {
       return rejectWithValue("No items returned from server");
@@ -154,7 +152,7 @@ export const cartSlice = createSlice({
         }
       })
       .addCase(removeFromCartAPI.fulfilled, (state, action) => {
-        const productId = action.meta.arg.product_id; // Отримуємо ID продукту з аргументів
+        const productId = action.meta.arg.product_id; 
         state.items = state.items.filter(
           (item) => item.product_id !== productId
         );

@@ -10,10 +10,12 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  isAdmin: boolean;
 }
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
+  isAdministrator: boolean;
   loading: boolean;
   error: string | null;
 }
@@ -21,6 +23,7 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
+  isAdministrator: false,
   loading: false,
   error: null,
 };
@@ -83,11 +86,13 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload;
         state.isAuthenticated = !!action.payload;
+        state.isAdministrator = action.payload ? action.payload.isAdmin : false; // Додано перевірку
       })
       .addCase(fetchCurrentUser.rejected, (state) => {
         state.loading = false;
         state.user = null;
         state.isAuthenticated = false;
+        state.isAdministrator = false;
       })
       // login
       .addCase(login.pending, (state) => {
@@ -98,11 +103,13 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload;
         state.isAuthenticated = true;
+        state.isAdministrator = action.payload ? action.payload.isAdmin : false; // Додано перевірку
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
         state.isAuthenticated = false;
+        state.isAdministrator = false;
       })
       // register
       .addCase(register.pending, (state) => {
@@ -113,11 +120,13 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload;
         state.isAuthenticated = true;
+        state.isAdministrator = action.payload ? action.payload.isAdmin : false; // Додано перевірку
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
         state.isAuthenticated = false;
+        state.isAdministrator = false;
       })
       // logout
       .addCase(logout.fulfilled, (state) => {

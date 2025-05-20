@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Links,
   Meta,
@@ -7,13 +7,9 @@ import {
   ScrollRestoration,
   isRouteErrorResponse,
 } from "react-router";
-import { Provider, useDispatch, useSelector } from "react-redux";
+import { Provider} from "react-redux";
 import { store } from "./redux/store";
-import type { RootState, AppDispatch } from "./redux/store";
-import { fetchCurrentUser, selectAuth, logout } from "./redux/slices/authSlice";
-import Header from "./components/Header";
-import './app.css'
-import { fetchCart } from "./redux/slices/cartSlice";
+import "./app.css";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -32,37 +28,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 function AppContent() {
-  const dispatch = useDispatch<AppDispatch>();
-  const { isAuthenticated, user, loading } = useSelector(selectAuth);
-
-  useEffect(() => {
-    dispatch(fetchCurrentUser());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (isAuthenticated) { 
-      dispatch(fetchCart());
-    }
-  }, [isAuthenticated, dispatch]);
-
-  if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        Завантаження...
-      </div>
-    );
-  }
-
   return (
     <>
-      <Header
-        isAuthenticated={isAuthenticated}
-        user={user}
-        onLogout={() => dispatch(logout())}
-      />
-      <div className="container mx-auto py-4">
-        <Outlet />
-      </div>
+      <Outlet />
     </>
   );
 }
