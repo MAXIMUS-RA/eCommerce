@@ -7,10 +7,6 @@ function AdminLayout() {
   const { isAdministrator, isAuthenticated } = useSelector(selectAuth);
   const navigate = useNavigate();
   useEffect(() => {
-    console.log("AdminLayout useEffect Check:", {
-      isAdministrator,
-      isAuthenticated,
-    });
     if (!isAuthenticated) {
       console.log("User not authenticated, redirecting to /login");
       navigate("/login");

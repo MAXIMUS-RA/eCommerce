@@ -33,7 +33,7 @@ $staticRoutesConfig = [
         '/cart' => ['controller' => 'CartController', 'action' => 'viewCart'],
         '/admin/dashboard' => ['controller' => 'DashboardController', 'action' => 'index'],
         '/admin/products/create' => ['controller' => 'ProductsController', 'action' => 'create'],
-        '/admin/categories' => ['controller' => 'CategoriesController', 'action' => 'index'],
+        '/categories' => ['controller' => 'CategoriesController', 'action' => 'index'],
         '/users' => ['controller' => 'UsersController', 'action' => 'index'],
         '/auth/status' => ['controller' => 'AuthController', 'action' => 'status'],
     ],
