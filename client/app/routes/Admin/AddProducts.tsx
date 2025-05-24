@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useEffect, useRef } from "react"; // Додано useRef
+import React, { useState, useEffect, useRef } from "react";
 import type { FormEvent } from "react";
 
 interface Category {
@@ -21,7 +21,7 @@ function AddProducts() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const fileInputRef = useRef<HTMLInputElement>(null); 
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     axios

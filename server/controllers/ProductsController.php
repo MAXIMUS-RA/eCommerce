@@ -84,6 +84,10 @@ class ProductsController
 
         var_dump($data); 
 
+        if(!empty(Product::findBy("name",$data['name']))){
+            return new Response(["error"=>"This Products alredy exist"],400);
+        }
+
         try {
             $id = Product::create($data);
             if ($id) {

@@ -36,6 +36,9 @@ $staticRoutesConfig = [
         '/categories' => ['controller' => 'CategoriesController', 'action' => 'index'],
         '/users' => ['controller' => 'UsersController', 'action' => 'index'],
         '/auth/status' => ['controller' => 'AuthController', 'action' => 'status'],
+        '/orders' => ['controller' => 'OrdersController', 'action' => 'getUserOrders'],
+        '/admin/orders' => ['controller' => 'OrdersController', 'action' => 'getAllOrders'],
+
     ],
     'POST' => [
         '/register' => ['controller' => 'AuthController', 'action' => 'register'],
@@ -49,6 +52,11 @@ $staticRoutesConfig = [
         '/auth/register' => ['controller' => 'AuthController', 'action' => 'register'],
         '/auth/login' => ['controller' => 'AuthController', 'action' => 'login'],
         '/auth/logout' => ['controller' => 'AuthController', 'action' => 'logout'],
+        '/categories/store' => ['controller' => 'CategoriesController', 'action' => 'store'],
+        '/orders/store' => ['controller' => 'OrdersController', 'action' => 'createFromCart'],
+
+        
+
     ]
 ];
 

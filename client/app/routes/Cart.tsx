@@ -5,6 +5,8 @@ import { selectAuth } from "~/redux/slices/authSlice";
 import { selectCart, updateCart } from "~/redux/slices/cartSlice";
 import type { AppDispatch } from "~/redux/store";
 import CartItem from "~/components/CartItem";
+import axios from "axios";
+import { createOrderFromCart } from "~/redux/slices/orderSlice";
 
 export default function Cart() {
   const { isAuthenticated } = useSelector(selectAuth);
@@ -17,6 +19,14 @@ export default function Cart() {
       navigator("/login");
     }
   }, [isAuthenticated, navigator]);
+
+  const handleSubmit = async () => {
+    try {
+      dispatch(createOrderFromCart());
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -34,7 +44,7 @@ export default function Cart() {
           </a>
         </div>
       ) : (
-        <>
+        <form onSubmit={handleSubmit}>
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="hidden md:flex px-6 py-3 bg-gray-50 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               <div className="w-2/5">Product</div>
@@ -46,7 +56,7 @@ export default function Cart() {
 
             {items.map((element: any) => (
               <CartItem
-              key={element.id}
+                key={element.id}
                 id={element.id}
                 price={element.price}
                 quantity={element.quantity}
@@ -69,21 +79,21 @@ export default function Cart() {
                   {items
                     .reduce(
                       (sum: number, el: any) =>
-                        sum + (el.quantity ?? 1) * (el.price ?? 0), 
+                        sum + (el.quantity ?? 1) * (el.price ?? 0),
                       0
                     )
                     .toFixed(2)}
                 </span>
               </div>
-              <a
-                href="#"
+              <button
+                type="submit"
                 className="mt-6 block w-full text-center bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 transition font-semibold"
               >
-                Proceed to Checkout
-              </a>
+                Order
+              </button>
             </div>
           </div>
-        </>
+        </form>
       )}
     </div>
   );
