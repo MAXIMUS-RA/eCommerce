@@ -10,12 +10,12 @@ interface Product {
   id: number;
   name: string;
   description: string;
-  image_path: string; // Це відносний шлях, наприклад, /uploads/products/image.jpg
+  image_path: string; 
   price: number;
   stock: number;
 }
 
-const API_SERVER_URL = "http://localhost:8000"; // Визначте базову URL сервера
+const API_SERVER_URL = "http://localhost:8000"; 
 
 function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>();
@@ -130,7 +130,7 @@ function ProductDetailPage() {
               <img
                 src={`${API_SERVER_URL}${product.image_path}`} 
                 alt={product.name}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-cover"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-500">

@@ -22,6 +22,8 @@ interface PaginatedProductsResponse {
   current_page: number;
   per_page: number;
 }
+const API_SERVER_URL = "http://localhost:8000"; 
+
 
 function Products() {
   const [products, setProducts] = useState<Product[]>([]);

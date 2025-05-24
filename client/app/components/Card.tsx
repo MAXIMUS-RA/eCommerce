@@ -14,6 +14,7 @@ interface CardProduct {
   isAuthenticated:boolean
   
 }
+const API_SERVER_URL = "http://localhost:8000"; 
 
 function Card(props: CardProduct) {
   const dispatch = useDispatch<AppDispatch>();
@@ -35,11 +36,11 @@ function Card(props: CardProduct) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden max-w-xs flex flex-col h-full">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden max-w-xs w-full flex flex-col h-full">
       <div className="h-48 w-full overflow-hidden">
         <Link to={`/products/${props.id}`}>
           <img
-            src={props.image}
+            src={`${API_SERVER_URL}${props.image}`}
             alt={props.name}
             className="object-cover w-full h-full"
           />

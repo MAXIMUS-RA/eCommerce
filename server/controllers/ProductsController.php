@@ -34,36 +34,24 @@ class ProductsController
 
     public function store($params = [])
     {
-        // !!! ТИМЧАСОВО ДЛЯ ВІДЛАДКИ !!!
-        error_log("------- NEW PRODUCT STORE REQUEST -------");
-        error_log("POST data: " . print_r($_POST, true));
-        error_log("FILES data: " . print_r($_FILES, true));
-        // !!! КІНЕЦЬ ТИМЧАСОВОГО КОДУ !!!
-
-        // Перевірка, чи це POST-запит (хоча роутер вже мав би це зробити)
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             return new Response(['error' => 'Invalid request method.'], 405);
         }
 
-        // Отримуємо текстові дані з $_POST
         $categoryId = $_POST['category_id'] ?? null;
         $name = $_POST['name'] ?? null;
         $description = $_POST['description'] ?? null;
         $price = $_POST['price'] ?? null;
         $stock = $_POST['stock'] ?? null;
 
-        // Валідація обов'язкових полів
         if (empty($categoryId) || empty($name) || empty($price) || empty($stock)) {
-            // Можна додати більш детальну валідацію для кожного поля
             return new Response(['error' => 'Category ID, Name, Price, and Stock are required.'], 400);
         }
 
-        $imagePathInDb = null; // Шлях до зображення, який буде збережено в БД
+        $imagePathInDb = null; 
 
-        // Обробка завантаженого файлу
-        // Використовуємо ключ "image", як він надсилається з фронтенду
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = __DIR__ . '/../../public/uploads/products/'; // Адаптуйте шлях
+            $uploadDir = __DIR__ . '/../../public/uploads/products/'; 
             if (!is_dir($uploadDir)) {
                 if (!mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
                     error_log('Failed to create upload directory: ' . $uploadDir);
@@ -71,20 +59,17 @@ class ProductsController
                 }
             }
 
-            // Генерація унікального імені файлу, щоб уникнути перезапису
             $fileExtension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
             $fileName = uniqid('product_', true) . '.' . $fileExtension;
             $targetFilePath = $uploadDir . $fileName;
 
             if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFilePath)) {
-                $imagePathInDb = '/uploads/products/' . $fileName; // Шлях, доступний через веб
+                $imagePathInDb = '/uploads/products/' . $fileName; 
             } else {
                 error_log('Failed to move uploaded file: ' . $_FILES['image']['name']);
             }
         } elseif (isset($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
-            // Якщо файл був надісланий, але сталася помилка, крім "файл не вибрано"
             error_log('File upload error: ' . $_FILES['image']['error'] . ' for file ' . $_FILES['image']['name']);
-            // return new Response(['error' => 'Error uploading image: code ' . $_FILES['image']['error']], 400);
         }
 
 
@@ -92,17 +77,17 @@ class ProductsController
             'category_id'  => (int)$categoryId,
             'name'  => trim($name),
             'description'  => trim($description),
-            'price'  => (float)$price, // Переконайтесь, що тип даних правильний
-            'stock'  => (int)$stock,   // Переконайтесь, що тип даних правильний
-            'image_path'  => $imagePathInDb, // Зберігаємо шлях до файлу або null
+            'price'  => (float)$price, 
+            'stock'  => (int)$stock,   
+            'image_path'  => $imagePathInDb, 
         ];
 
-        var_dump($data); // Для відладки, потім прибрати
+        var_dump($data); 
 
         try {
             $id = Product::create($data);
             if ($id) {
-                $createdProduct = Product::find($id); // Отримати створений продукт для відповіді
+                $createdProduct = Product::find($id); 
                 return new Response(['message' => 'Product created successfully', 'product' => $createdProduct], 201);
             } else {
                 return new Response(['error' => 'Failed to create product in database.'], 500);
@@ -113,3 +98,4 @@ class ProductsController
         }
     }
 }
+

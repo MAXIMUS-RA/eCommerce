@@ -22,10 +22,12 @@ interface CartItemAdd {
 
 interface CartState {
   items: CartItem[];
+  isLoading:boolean;
 }
 
 const initialState: CartState = {
   items: [],
+  isLoading:true,
 };
 
 export const fetchCart = createAsyncThunk<CartItem[], void>(
@@ -134,6 +136,7 @@ export const cartSlice = createSlice({
     builder
       .addCase(fetchCart.fulfilled, (state, action) => {
         state.items = action.payload;
+        state.isLoading = false;
       })
       .addCase(addToCartAPI.fulfilled, (state, action) => {
         if (!action.payload || !action.payload.id) {

@@ -8,6 +8,8 @@ import {
 } from "~/redux/slices/cartSlice";
 import type { AppDispatch } from "~/redux/store";
 
+const API_SERVER_URL = "http://localhost:8000"; 
+
 interface CartItemProps {
   id: number;
   name: string;
@@ -28,12 +30,14 @@ export default function CartItem({
   product_id,
 }: CartItemProps) {
   const dispatch = useDispatch<AppDispatch>();
+  console.log(image_path);
+  
 
   return (
     <div className="flex flex-col md:flex-row items-center px-6 py-4 border-b border-gray-200">
       <div className="w-full md:w-2/5 flex items-center mb-4 md:mb-0">
         <img
-          src={image_path || "#"}
+          src={`${API_SERVER_URL}${image_path}`}
           alt={name || "Product image"}
           className="w-16 h-16 object-cover rounded mr-4 flex-shrink-0"
         />

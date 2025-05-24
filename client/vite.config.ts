@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [tsconfigPaths(),tailwindcss(), reactRouter()],
   ssr: {
     noExternal: ["@reduxjs/toolkit"],
+    
   },
   server: {
     hmr: {
