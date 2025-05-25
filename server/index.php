@@ -55,7 +55,7 @@ $staticRoutesConfig = [
         '/categories/store' => ['controller' => 'CategoriesController', 'action' => 'store'],
         '/orders/store' => ['controller' => 'OrdersController', 'action' => 'createFromCart'],
 
-        
+
 
     ]
 ];
@@ -66,8 +66,17 @@ $dynamicRoutePatternsConfig = [
             'controller' => 'ProductsController',
             'action' => 'show'
         ],
+        "#^/orders/(?P<id>\d+)$#" => [ // Додано
+            'controller' => 'OrdersController',
+            'action' => 'getOrder'
+        ],
     ],
-    'POST' => []
+    'PUT' => [ // Додано PUT маршрути
+        "#^/admin/orders/(?P<id>\d+)/status$#" => [
+            'controller' => 'OrdersController',
+            'action' => 'updateOrderStatus'
+        ],
+    ]
 ];
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

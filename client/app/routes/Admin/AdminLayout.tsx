@@ -61,6 +61,18 @@ function AdminLayout() {
                 Add Categories
               </NavLink>
             </li>
+            <li className="mb-2">
+              <NavLink
+                to="/admin/orders"
+                className={({ isActive }) =>
+                  `block py-2 px-3 rounded transition-colors ${
+                    isActive ? "bg-gray-600" : "hover:bg-gray-600"
+                  }`
+                }
+              >
+                Orders
+              </NavLink>
+            </li>
           </ul>
         </nav>
         <div>

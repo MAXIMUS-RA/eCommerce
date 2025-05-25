@@ -18,15 +18,11 @@ class OrdersController
         return $_SESSION['user_id'] ?? null;
     }
 
-    /**
-     * Створює замовлення з поточного кошика
-     */
     public function createFromCart()
     {
         $userId = $this->getAuthenticatedUserId();
         if (!$userId) return new Response(['error' => 'User not authenticated.'], 401);
 
-        // Отримуємо поточний кошик
         $cart = Carts::findBy('user_id', $userId);
         if (!$cart) {
             return new Response(['error' => 'Cart is empty.'], 400);
@@ -34,12 +30,10 @@ class OrdersController
 
         $cartId = $cart['id'];
         $cartItems = CartItems::getItemsByCartIdWithProductDetails($cartId);
-
         if (empty($cartItems)) {
             return new Response(['error' => 'Cart is empty.'], 400);
         }
 
-        // Перевіряємо наявність товарів на складі
         foreach ($cartItems as $item) {
             $product = Product::find($item['product_id']);
             if (!$product || $product['stock'] < $item['quantity']) {
@@ -49,20 +43,16 @@ class OrdersController
             }
         }
 
-        // Розрахунок загальної суми (використовуємо поточні ціни з БД)
         $totalAmount = 0.00;
         foreach ($cartItems as $item) {
             $totalAmount += $item['price'] * $item['quantity'];
         }
 
-        // Створюємо замовлення
         $orderId = Orders::createFromCart($userId, $cartItems, $totalAmount);
-
         if (!$orderId) {
             return new Response(['error' => 'Failed to create order.'], 500);
         }
 
-        // Зменшуємо кількість товарів на складі
         foreach ($cartItems as $item) {
             $product = Product::find($item['product_id']);
             if ($product) {
@@ -71,7 +61,6 @@ class OrdersController
             }
         }
 
-        // Очищаємо кошик після успішного створення замовлення
         CartItems::deleteByCartId($cartId);
 
         return new Response([
@@ -81,17 +70,12 @@ class OrdersController
         ]);
     }
 
-    /**
-     * Отримання всіх замовлень користувача
-     */
     public function getUserOrders()
     {
         $userId = $this->getAuthenticatedUserId();
         if (!$userId) return new Response(['error' => 'User not authenticated.'], 401);
 
         $orders = Orders::findAllByUserId($userId);
-
-        // Додаємо товари до кожного замовлення
         foreach ($orders as &$order) {
             $order['items'] = OrderItems::getItemsByOrderIdWithProductDetails($order['id']);
         }
@@ -101,42 +85,31 @@ class OrdersController
         ]);
     }
 
-    /**
-     * Отримання конкретного замовлення
-     */
     public function getOrder($orderId)
     {
         $userId = $this->getAuthenticatedUserId();
         if (!$userId) return new Response(['error' => 'User not authenticated.'], 401);
 
         $order = Orders::find($orderId);
-
         if (!$order || $order['user_id'] != $userId) {
             return new Response(['error' => 'Order not found.'], 404);
         }
 
         $order['items'] = OrderItems::getItemsByOrderIdWithProductDetails($orderId);
-
         return new Response(['order' => $order]);
     }
 
-    /**
-     * Отримання всіх замовлень (для адміністратора)
-     */
     public function getAllOrders()
     {
-        // Перевірка, чи користувач є адміністратором
         $userId = $this->getAuthenticatedUserId();
         if (!$userId) return new Response(['error' => 'User not authenticated.'], 401);
 
         $user = Users::find($userId);
-        if (!$user || !$user['is_administrator']) {
+        if (!$user || !$user['isAdmin']) {
             return new Response(['error' => 'Access denied.'], 403);
         }
 
         $orders = Orders::all();
-
-        // Додаємо товари та інформацію про користувача до кожного замовлення
         foreach ($orders as &$order) {
             $order['items'] = OrderItems::getItemsByOrderIdWithProductDetails($order['id']);
             $orderUser = Users::find($order['user_id']);
@@ -148,33 +121,42 @@ class OrdersController
         ]);
     }
 
-    /**
-     * Оновлення статусу замовлення (для адміністратора)
-     */
-    public function updateOrderStatus($orderId)
+    public function updateOrderStatus($params) 
     {
+        $orderId = is_array($params) ? ($params['id'] ?? null) : $params;
+        if (!$orderId || !is_numeric($orderId)) {
+            return new Response(['error' => 'Invalid order ID.'], 400);
+        }
+
+        $orderId = (int)$orderId; 
+
         $userId = $this->getAuthenticatedUserId();
         if (!$userId) return new Response(['error' => 'User not authenticated.'], 401);
 
         $user = Users::find($userId);
-        if (!$user || !$user['is_administrator']) {
+
+        if (!$user || !$user['isAdmin']) { 
+            error_log("Access denied - user is not administrator. User data: " . print_r($user, true));
             return new Response(['error' => 'Access denied.'], 403);
         }
 
         $input = json_decode(file_get_contents('php://input'), true);
         $status = $input['status'] ?? null;
 
-        // Використовуємо правильні статуси з вашої БД
         if (!$status || !in_array($status, ['pending', 'processing', 'shipped', 'delivered', 'cancelled'])) {
+            error_log("Invalid status: " . ($status ?? 'null'));
             return new Response(['error' => 'Valid status is required. Allowed: pending, processing, shipped, delivered, cancelled'], 400);
         }
 
         $order = Orders::find($orderId);
         if (!$order) {
+            error_log("Order not found: " . $orderId);
             return new Response(['error' => 'Order not found.'], 404);
         }
 
+        error_log("Attempting to update order " . $orderId . " to status: " . $status);
         $updated = Orders::update($orderId, ['status' => $status]);
+        error_log("Update result: " . ($updated ? 'success' : 'failed'));
 
         if ($updated) {
             return new Response(['message' => 'Order status updated successfully.']);
