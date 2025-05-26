@@ -13,6 +13,8 @@ export default [
     route("/login", "routes/Login.tsx"),
     route("/register", "routes/Register.tsx"),
     route("/cart", "routes/Cart.tsx"),
+    route("/profile", "routes/Profile.tsx"),
+
   ]),
   route("admin", "./routes/Admin/AdminLayout.tsx", [
     route("dashboard", "routes/Admin/Dashboard.tsx"),

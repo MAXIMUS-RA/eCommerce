@@ -14,7 +14,7 @@ class CartController
 
     private function getAuthenticatedUserId(): ?int
     {
-        AuthMiddleware::checkAuthenticated(); // Завершить виконання, якщо не автентифікований
+        AuthMiddleware::checkAuthenticated(); 
         return $_SESSION['user_id'] ?? null;
     }
 
@@ -27,14 +27,10 @@ class CartController
         return $input ?: [];
     }
 
-    /**
-     * Отримує або створює кошик для поточного автентифікованого користувача.
-     */
     private function getUserCart(int $userId): ?array
     {
         $cart = Carts::findOrCreateByUserId($userId);
         if (!$cart) {
-            // Ця помилка не повинна повертатися клієнту напряму, якщо це внутрішня логіка
             error_log("CartController: Could not find or create cart for user {$userId}.");
             return null;
         }

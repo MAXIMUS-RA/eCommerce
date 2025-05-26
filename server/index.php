@@ -54,6 +54,8 @@ $staticRoutesConfig = [
         '/auth/logout' => ['controller' => 'AuthController', 'action' => 'logout'],
         '/categories/store' => ['controller' => 'CategoriesController', 'action' => 'store'],
         '/orders/store' => ['controller' => 'OrdersController', 'action' => 'createFromCart'],
+        '/upload/avatar' => ['controller' => 'UsersController', 'action' => 'uploadAvatar'],
+
 
 
 

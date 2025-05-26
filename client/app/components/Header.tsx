@@ -98,11 +98,13 @@ function Header({ isAuthenticated, user, onLogout, isAdmin }: HeaderProps) {
                 </>
               ) : (
                 <>
-                  {user && (
-                    <li className="text-gray-700 px-3 py-2">
-                      Вітаю, {user.name || user.email}!
-                    </li>
-                  )}
+                  <Link to={"profile"}>
+                    {user && (
+                      <li className="text-gray-700 px-3 py-2">
+                        Вітаю, {user.name || user.email}!
+                      </li>
+                    )}
+                  </Link>
                 </>
               )}
               <li>
