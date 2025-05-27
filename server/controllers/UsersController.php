@@ -5,7 +5,6 @@ use Core\AuthMiddleware;
 
 class UsersController
 {
-
     function index()
     {
         AuthMiddleware::checkAdmin();
@@ -90,44 +89,6 @@ class UsersController
         }
     }
 
-    function updateAvatar()
-    {
-        $userId = $this->getAuthenticatedUserId();
-        if (!$userId) {
-            return new Response(["error" => "No user found"]);
-        }
-
-        $input = json_decode(file_get_contents('php://input'), true);
-
-        $name = trim($input['name'] ?? '');
-        $email = trim($input['email'] ?? '');
-
-
-        if (empty($name) || empty($email)) {
-            return new Response(['error' => 'Name and email are required.'], 400);
-        }
-
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return new Response(['error' => 'Invalid email format.'], 400);
-        }
-
-        $existingUser = Users::findBy('email', $email);
-        if ($existingUser && $existingUser['id'] != $userId) {
-            return new Response(['error' => 'Email already taken.'], 400);
-        }
-
-        $updated = Users::update($userId, [
-            'name' => $name,
-            'email' => $email,
-        ]);
-
-        if ($updated) {
-            return new Response(['message' => 'Profile updated successfully.']);
-        } else {
-            return new Response(['error' => 'Failed to update profile.'], 500);
-        }
-    }
-
     function updateProfile()
     {
         $userId = $this->getAuthenticatedUserId();
@@ -139,31 +100,70 @@ class UsersController
 
         $name = trim($input['name'] ?? '');
         $email = trim($input['email'] ?? '');
+        $phone = trim($input['phone'] ?? '');
 
-        // Валідація
+        error_log("Profile update data: " . print_r($input, true)); 
+
         if (empty($name) || empty($email)) {
             return new Response(['error' => 'Name and email are required.'], 400);
         }
 
+        if (!empty($phone) && !preg_match('/^\+?[1-9]\d{1,14}$/', $phone)) {
+            return new Response(['error' => 'Invalid phone number format.'], 400);
+        }
+
+        // Валідація email
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return new Response(['error' => 'Invalid email format.'], 400);
         }
 
-        // Перевіряємо, чи email не зайнятий іншим користувачем
+        // Перевірка унікальності email
         $existingUser = Users::findBy('email', $email);
         if ($existingUser && $existingUser['id'] != $userId) {
             return new Response(['error' => 'Email already taken.'], 400);
         }
 
-        $updated = Users::update($userId, [
+        $updateData = [
             'name' => $name,
             'email' => $email,
-        ]);
+        ];
+
+        if (!empty($phone)) {
+            $updateData['phone'] = $phone;
+        }
+
+        $updated = Users::update($userId, $updateData);
 
         if ($updated) {
             return new Response(['message' => 'Profile updated successfully.']);
         } else {
             return new Response(['error' => 'Failed to update profile.'], 500);
         }
+    }
+
+    function getProfile()
+    {
+        $userId = $this->getAuthenticatedUserId();
+        if (!$userId) {
+            return new Response(['error' => 'User not authenticated.'], 401);
+        }
+
+        $user = Users::find($userId);
+        if (!$user) {
+            return new Response(['error' => 'User not found.'], 404);
+        }
+
+        // Видаляємо чутливі дані
+        unset($user['password']);
+        unset($user['remember_token']);
+
+        // Додаємо повний URL для аватара
+        if (!empty($user['avatar'])) {
+            $user['avatar_url'] = 'http://localhost:8000' . $user['avatar'];
+        } else {
+            $user['avatar_url'] = null;
+        }
+
+        return new Response(['user' => $user]);
     }
 }

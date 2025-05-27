@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectAuth } from "~/redux/slices/authSlice";
 import {
   Camera,
@@ -10,16 +10,48 @@ import {
   Mail,
   Phone,
   Calendar,
+  MoreHorizontal,
+  Badge,
 } from "lucide-react";
 import axios from "axios";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@radix-ui/react-dropdown-menu";
+import { Button } from "~/components/ui/button";
+import type { ColumnDef } from "@tanstack/react-table";
+import DataTable from "~/components/DataTable";
+import { fetchUserOrders, selectOrder } from "~/redux/slices/orderSlice";
+import type { AppDispatch } from "~/redux/store";
 
 interface UserProfile {
   id: number;
   name: string;
   email: string;
   avatar?: string | null;
-  phone?: string;
+  phone_number?: string;
   created_at: string;
+}
+interface OrderItem {
+  id: number;
+  quantity: number;
+  product_id: number;
+  name: string;
+  description: string;
+  price: number;
+  image_path: string;
+}
+
+interface Order {
+  id: number;
+  user_id: number;
+  total_amount: number;
+  created_at: string;
+  status: string;
+  user_email?: string;
+  items: OrderItem[];
 }
 
 function Profile() {
@@ -29,15 +61,19 @@ function Profile() {
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // const [order,setOrder] = useState<Order[]>([])
+  const { orders } = useSelector(selectOrder);
+  const dispatch = useDispatch<AppDispatch>();
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
+    phone_number: "",
   });
 
   useEffect(() => {
     fetchProfile();
+    dispatch(fetchUserOrders());
   }, []);
 
   const fetchProfile = async () => {
@@ -50,14 +86,14 @@ function Profile() {
       if (user) {
         const mockProfile = {
           ...user,
-          phone: "+380 12 345 67 89",
+          phone_number: "+380 12 345 67 89",
           created_at: "2024-01-15T10:30:00Z",
         };
         setProfile(mockProfile);
         setFormData({
           name: user.name || "",
           email: user.email || "",
-          phone: "+380 12 345 67 89",
+          phone_number: "+380 12 345 67 89",
         });
       }
     } catch (error) {
@@ -93,16 +129,10 @@ function Profile() {
         "http://localhost:8000/upload/avatar",
         formData
       );
-      
-      setProfile(prev => prev ? { ...prev, avatar: response.data.avatar_url } : null);
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setProfile((prev) =>
-          prev ? { ...prev, avatar: e.target?.result as string } : null
-        );
-      };
-      reader.readAsDataURL(file);
+      setProfile((prev) =>
+        prev ? { ...prev, avatar: response.data.avatar_url } : null
+      );
     } catch (error: any) {
       console.error("Upload failed:", error);
       alert("Помилка завантаження");
@@ -113,7 +143,7 @@ function Profile() {
 
   const handleSave = async () => {
     try {
-      // await axios.put('http://localhost:8000/auth/profile', formData);
+      await axios.put("http://localhost:8000/auth/profile", formData);
       setProfile((prev) => (prev ? { ...prev, ...formData } : null));
       setIsEditing(false);
     } catch (error) {
@@ -127,7 +157,7 @@ function Profile() {
       setFormData({
         name: profile.name,
         email: profile.email,
-        phone: profile.phone || "",
+        phone_number: profile.phone_number || "",
       });
     }
     setIsEditing(false);
@@ -150,6 +180,86 @@ function Profile() {
     });
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "processing":
+        return "bg-blue-100 text-blue-800";
+      case "shipped":
+        return "bg-green-100 text-green-800";
+      case "delivered":
+        return "bg-green-100 text-green-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const columns: ColumnDef<Order>[] = [
+    {
+      accessorKey: "id",
+      header: "ID замовлення",
+    },
+    {
+      accessorKey: "user_email",
+      header: "Користувач",
+      cell: ({ row }) => {
+        const order = row.original;
+        return order.user_email || `ID: ${order.user_id}`;
+      },
+    },
+    {
+      accessorKey: "created_at",
+      header: "Дата створення",
+      cell: ({ row }) => {
+        const date = new Date(row.getValue("created_at"));
+        return date.toLocaleDateString("uk-UA");
+      },
+    },
+    {
+      accessorKey: "total_amount",
+      header: "Сума",
+      cell: ({ row }) => {
+        const amount = parseFloat(row.getValue("total_amount"));
+        return `${amount.toFixed(2)} $`;
+      },
+    },
+    {
+      accessorKey: "status",
+      header: "Статус",
+      cell: ({ row }) => {
+        const status = row.getValue("status") as string;
+        return <Badge className={getStatusColor(status)}>{status}</Badge>;
+      },
+    },
+    {
+      accessorKey: "items",
+      header: "Товари",
+      cell: ({ row }) => {
+        const items = row.getValue("items") as OrderItem[];
+        return `${items.length} товар(ів)`;
+      },
+    },
+  ];
+
+  // useEffect(() => {
+  //   const fetchOrders = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const response = await axios.get("http://localhost:8000/admin/orders");
+  //       setOrder(response.data.orders || []);
+  //     } catch (e: any) {
+  //       console.log(e);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchOrders();
+  // }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -170,11 +280,9 @@ function Profile() {
       </div>
     );
   }
-  
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
@@ -189,14 +297,11 @@ function Profile() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="space-y-6">
-          {/* Profile Card */}
           <div className="bg-white overflow-hidden shadow-lg rounded-xl">
             <div className="px-6 py-8">
               <div className="flex items-center space-x-6">
-                {/* Avatar */}
                 <div className="relative">
                   <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center overflow-hidden">
                     {profile.avatar ? (
@@ -205,9 +310,7 @@ function Profile() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span className="text-white text-2xl font-bold">
-                        ❗
-                      </span>
+                      <span className="text-white text-2xl font-bold">❗</span>
                     )}
                   </div>
 
@@ -228,7 +331,6 @@ function Profile() {
                   />
                 </div>
 
-                {/* User Info */}
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold text-gray-900">
                     {profile.name}
@@ -240,7 +342,6 @@ function Profile() {
                   </div>
                 </div>
 
-                {/* Edit Button */}
                 <div className="flex space-x-2">
                   {isEditing ? (
                     <>
@@ -273,7 +374,6 @@ function Profile() {
             </div>
           </div>
 
-          {/* Personal Information */}
           <div className="bg-white shadow-lg rounded-xl overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-medium text-gray-900">
@@ -283,7 +383,6 @@ function Profile() {
 
             <div className="px-6 py-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Full Name */}
                 <div className="space-y-2">
                   <label className="flex items-center text-sm font-medium text-gray-700">
                     <User className="w-4 h-4 mr-2" />
@@ -306,7 +405,6 @@ function Profile() {
                   )}
                 </div>
 
-                {/* Email */}
                 <div className="space-y-2">
                   <label className="flex items-center text-sm font-medium text-gray-700">
                     <Mail className="w-4 h-4 mr-2" />
@@ -329,7 +427,6 @@ function Profile() {
                   )}
                 </div>
 
-                {/* Phone */}
                 <div className="space-y-2">
                   <label className="flex items-center text-sm font-medium text-gray-700">
                     <Phone className="w-4 h-4 mr-2" />
@@ -338,21 +435,23 @@ function Profile() {
                   {isEditing ? (
                     <input
                       type="tel"
-                      value={formData.phone}
+                      value={formData.phone_number}
                       onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
+                        setFormData({
+                          ...formData,
+                          phone_number: e.target.value,
+                        })
                       }
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                       placeholder="Введіть ваш номер телефону"
                     />
                   ) : (
                     <div className="px-4 py-3 bg-gray-50 rounded-lg text-gray-900">
-                      {profile.phone || "Не вказано"}
+                      {profile.phone_number || "Не вказано"}
                     </div>
                   )}
                 </div>
 
-                {/* Registration Date */}
                 <div className="space-y-2">
                   <label className="flex items-center text-sm font-medium text-gray-700">
                     <Calendar className="w-4 h-4 mr-2" />
@@ -366,7 +465,6 @@ function Profile() {
             </div>
           </div>
 
-          {/* Account Stats */}
           <div className="bg-white shadow-lg rounded-xl overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-medium text-gray-900">
@@ -393,6 +491,14 @@ function Profile() {
                   <div className="text-sm text-gray-600">Відгуків</div>
                 </div>
               </div>
+            </div>
+          </div>
+          <div className="bg-white shadow-lg rounded-xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900">Замовлення</h3>
+            </div>
+            <div className="bg-white rounded-lg shadow-md">
+              <DataTable columns={columns} data={orders} input={false} />
             </div>
           </div>
         </div>

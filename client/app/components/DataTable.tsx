@@ -12,8 +12,8 @@ import type {
   ColumnFiltersState,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 
 import {
   Table,
@@ -27,12 +27,14 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  input?: boolean;
 }
 
-function DataTable<TData, Tvalue>({
+function DataTable<TData, TValue>({
   columns,
   data,
-}: DataTableProps<TData, Tvalue>) {
+  input = false,
+}: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -53,18 +55,19 @@ function DataTable<TData, Tvalue>({
 
   return (
     <div className="p-4">
-      Фільтр пошуку
+     {input && (
       <div className="flex items-center py-4">
         <Input
           placeholder="Пошук по email користувача..."
-          value={(table.getColumn("user_email")?.getFilterValue() as string) ?? ""}
+          value={
+            (table.getColumn("user_email")?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
             table.getColumn("user_email")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
-      </div>
-
+      </div>)}
       <div className="rounded-md border">
         <Table>
           <TableHeader className="bg-gray-400">
@@ -80,7 +83,7 @@ function DataTable<TData, Tvalue>({
                             header.getContext()
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -94,14 +97,20 @@ function DataTable<TData, Tvalue>({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   Замовлення не знайдено.
                 </TableCell>
               </TableRow>
@@ -109,12 +118,10 @@ function DataTable<TData, Tvalue>({
           </TableBody>
         </Table>
       </div>
-
-      <div className="flex items-center justify-end space-x-2 py-4">
+      {input &&(<div className="flex items-center justify-end space-x-2 py-4">
         <Button
           variant="outline"
           className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-
           size="sm"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
@@ -130,9 +137,9 @@ function DataTable<TData, Tvalue>({
         >
           Наступна
         </Button>
-      </div>
+      </div>)}
     </div>
-  )
+  );
 }
 
 export default DataTable;

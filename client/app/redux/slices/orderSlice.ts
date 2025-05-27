@@ -86,7 +86,6 @@ const orderSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Create order from cart
       .addCase(createOrderFromCart.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -98,7 +97,6 @@ const orderSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      // Fetch user orders
       .addCase(fetchUserOrders.pending, (state) => {
         state.isLoading = true;
       })
@@ -110,7 +108,6 @@ const orderSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      // Fetch specific order
       .addCase(fetchOrder.fulfilled, (state, action) => {
         state.currentOrder = action.payload;
       });

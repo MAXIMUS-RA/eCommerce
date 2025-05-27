@@ -198,7 +198,7 @@ function OrdersAdmin() {
         Управління замовленнями
       </h1>
       <div className="bg-white rounded-lg shadow-md">
-        <DataTable columns={columns} data={orders} />
+        <DataTable columns={columns} data={orders} input={true} />
       </div>
     </div>
   );
