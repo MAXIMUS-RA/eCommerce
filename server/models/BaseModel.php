@@ -17,53 +17,72 @@ abstract class BaseModel
         $stmt = static::$pdo->query("SELECT * FROM " . static::$table);
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
-    public static function paginate(int $page = 1, int $perPage = 10): array
+    public static function paginate(int $page = 1, int $perPage = 10, $categoryId = null): array
     {
         if (!isset(static::$pdo) || !(static::$pdo instanceof \PDO)) {
-            error_log("CRITICAL ERROR in " . __METHOD__ . ": BaseModel::\$pdo is not a valid PDO object for table " . (isset(static::$table) ? static::$table : 'unknown') . ".");
-            throw new \LogicException("BaseModel::\$pdo is not initialized in " . __METHOD__);
+            error_log("CRITICAL ERROR in " . __METHOD__ . " (BaseModel.php): BaseModel::\$pdo is not a valid PDO object.");
+            return [];
         }
 
-        // 1. Get total count of items
-        $totalCountStmt = static::$pdo->query("SELECT COUNT(*) FROM " . static::$table);
-        $totalItems = (int) $totalCountStmt->fetchColumn();
+        $params = [];
+        $whereClause = "";
 
-        // 2. Calculate total pages
+        if ($categoryId !== null && $categoryId !== 'null' && is_numeric($categoryId)) {
+            $whereClause = " WHERE category_id = :category_id";
+            $params['category_id'] = (int)$categoryId;
+        }
+
+        $countSql = "SELECT COUNT(*) FROM " . static::$table . $whereClause;
+        try {
+            $stmt = static::$pdo->prepare($countSql);
+            $stmt->execute($params);
+            $totalItems = (int) $stmt->fetchColumn();
+        } catch (\PDOException $e) {
+            error_log("PDOException in " . __METHOD__ . " (counting): " . $e->getMessage());
+            return [];
+        }
+
         $totalPages = (int) ceil($totalItems / $perPage);
 
-        // Ensure page is within valid range
         if ($page < 1) {
             $page = 1;
         }
-        // If totalPages is 0 (no items), page 1 is fine. Otherwise, cap page at totalPages.
         if ($page > $totalPages && $totalPages > 0) {
             $page = $totalPages;
         }
-        
-        // Handle case where there are no items, page should still be 1
         if ($totalPages === 0 && $page > 1) {
             $page = 1;
         }
 
-
-        // 3. Calculate offset
         $offset = ($page - 1) * $perPage;
 
-        // 4. Fetch data for the current page
-        $sql = "SELECT * FROM " . static::$table . " ORDER BY " . static::$primaryKey . " ASC LIMIT :perPage OFFSET :offset";
-        $stmt = static::$pdo->prepare($sql);
-        $stmt->bindValue(':perPage', $perPage, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        $sql = "SELECT * FROM " . static::$table . $whereClause . " ORDER BY created_at DESC LIMIT :limit OFFSET :offset";
 
-        return [
-            'data' => $data,
-            'total_items' => $totalItems,
-            'total_pages' => $totalPages,
-            'current_page' => $page,
-            'per_page' => $perPage,
-        ];
+        try {
+            $stmt = static::$pdo->prepare($sql);
+
+            // Bind parameters
+            foreach ($params as $key => $value) {
+                $stmt->bindValue(":$key", $value, \PDO::PARAM_INT);
+            }
+
+            $stmt->bindValue(':limit', $perPage, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+
+            $stmt->execute();
+            $data = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+
+            return [
+                'data' => $data,
+                'total_items' => $totalItems,
+                'total_pages' => $totalPages,
+                'current_page' => $page,
+                'per_page' => $perPage
+            ];
+        } catch (\PDOException $e) {
+            error_log("PDOException in " . __METHOD__ . " (fetching data): " . $e->getMessage());
+            return [];
+        }
     }
 
     static function find(int $id): ?array

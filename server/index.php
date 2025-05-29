@@ -38,6 +38,8 @@ $staticRoutesConfig = [
         '/auth/status' => ['controller' => 'AuthController', 'action' => 'status'],
         '/orders' => ['controller' => 'OrdersController', 'action' => 'getUserOrders'],
         '/admin/orders' => ['controller' => 'OrdersController', 'action' => 'getAllOrders'],
+        '/admin/products' => ['controller' => 'ProductsController', 'action' => 'adminIndex'],
+
 
     ],
     'POST' => [
@@ -72,12 +74,29 @@ $dynamicRoutePatternsConfig = [
             'action' => 'getOrder'
         ],
     ],
-    'PUT' => [ // Додано PUT маршрути
+    'POST' => [
+        "#^/admin/products/(?P<id>\d+)$#" => [
+            'controller' => 'ProductsController',
+            'action' => 'update'
+        ],
+    ],
+    'PUT' => [
         "#^/admin/orders/(?P<id>\d+)/status$#" => [
             'controller' => 'OrdersController',
             'action' => 'updateOrderStatus'
         ],
-    ]
+        "#^/admin/products/(?P<id>\d+)$#" => [
+            'controller' => 'ProductsController',
+            'action' => 'update'
+        ],
+    ],
+    'DELETE' => [
+        "#^/admin/products/(?P<id>\d+)$#" => [
+            'controller' => 'ProductsController',
+            'action' => 'delete'
+        ],
+    ],
+
 ];
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

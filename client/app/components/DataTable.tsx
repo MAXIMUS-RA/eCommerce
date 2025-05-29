@@ -28,12 +28,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   input?: boolean;
+  disablePagination?: boolean; 
 }
 
-function DataTable<TData, TValue>({
+export function DataTable<TData, TValue>({
   columns,
   data,
-  input = false,
+  input = true,
+  disablePagination = false, 
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -42,7 +44,9 @@ function DataTable<TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    ...(disablePagination
+      ? {}
+      : { getPaginationRowModel: getPaginationRowModel() }),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
@@ -54,20 +58,21 @@ function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="p-4">
-     {input && (
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Пошук по email користувача..."
-          value={
-            (table.getColumn("user_email")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn("user_email")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-      </div>)}
+    <div className="w-full">
+      {input && (
+        <div className="flex items-center py-4">
+          <Input
+            placeholder="Пошук "
+            value={
+              (table.getColumn("user_email")?.getFilterValue() as string) ?? ""
+            }
+            onChange={(event) =>
+              table.getColumn("user_email")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
+        </div>
+      )}
       <div className="rounded-md border">
         <Table>
           <TableHeader className="bg-gray-400">
@@ -118,26 +123,29 @@ function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      {input &&(<div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Попередня
-        </Button>
-        <Button
-          variant="outline"
-          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Наступна
-        </Button>
-      </div>)}
+
+      {!disablePagination && (
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Попередня
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Наступна
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

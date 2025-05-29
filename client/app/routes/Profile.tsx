@@ -61,7 +61,6 @@ function Profile() {
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // const [order,setOrder] = useState<Order[]>([])
   const { orders } = useSelector(selectOrder);
   const dispatch = useDispatch<AppDispatch>();
 
@@ -78,11 +77,6 @@ function Profile() {
 
   const fetchProfile = async () => {
     try {
-      // Якщо у вас є API для профілю
-      // const response = await axios.get('http://localhost:8000/auth/profile');
-      // setProfile(response.data.user);
-
-      // Поки що використовуємо дані з Redux
       if (user) {
         const mockProfile = {
           ...user,
@@ -231,7 +225,7 @@ function Profile() {
       header: "Статус",
       cell: ({ row }) => {
         const status = row.getValue("status") as string;
-        return <Badge className={getStatusColor(status)}>{status}</Badge>;
+        return <div className={`${getStatusColor(status)} w-fit p-2`}>{status}</div>
       },
     },
     {
@@ -243,22 +237,6 @@ function Profile() {
       },
     },
   ];
-
-  // useEffect(() => {
-  //   const fetchOrders = async () => {
-  //     try {
-  //       setLoading(true);
-  //       const response = await axios.get("http://localhost:8000/admin/orders");
-  //       setOrder(response.data.orders || []);
-  //     } catch (e: any) {
-  //       console.log(e);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchOrders();
-  // }, []);
 
   if (loading) {
     return (

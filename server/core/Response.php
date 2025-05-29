@@ -22,33 +22,38 @@ class Response
     }
 
     public function send(): void
-    {
-        if (headers_sent($file, $line)) {
-            error_log("Headers already sent in {$file} on line {$line}. Cannot send JSON response properly.");
-        }
-        header("Access-Control-Allow-Origin: http://localhost:5173");
-        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-        header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+{
+    // ✅ ВИПРАВЛЕНО: Додати CORS заголовки
+    header('Access-Control-Allow-Origin: http://localhost:5173');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization');
+    header('Access-Control-Allow-Credentials: true');
 
-        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-            http_response_code(204); 
-            exit;
-        }
-
-        if (!isset($this->headers['Content-Type'])) {
-            header('Content-Type: application/json');
-        }
-
-        foreach ($this->headers as $name => $value) {
-            header("{$name}: {$value}", true);
-        }
-
-        http_response_code($this->statusCode);
-
-        echo json_encode($this->data);
-
+    if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        http_response_code(200); // ✅ ВИПРАВЛЕНО: змінено з 204 на 200
         exit;
     }
+
+    if (!isset($this->headers['Content-Type'])) {
+        header('Content-Type: application/json');
+    }
+
+    foreach ($this->headers as $name => $value) {
+        header("{$name}: {$value}", true);
+    }
+
+    // ✅ ВИПРАВЛЕНО: Перевіряємо що статус код валідний
+    $statusCode = $this->statusCode;
+    if ($statusCode < 100 || $statusCode > 599) {
+        error_log("Invalid status code: " . $statusCode . ". Using 200 instead.");
+        $statusCode = 200;
+    }
+    
+    http_response_code($statusCode);
+
+    echo json_encode($this->data);
+    exit;
+}
 
     public static function json($data, int $statusCode = 200): self
     {

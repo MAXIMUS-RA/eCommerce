@@ -18,8 +18,10 @@ export default [
   ]),
   route("admin", "./routes/Admin/AdminLayout.tsx", [
     route("dashboard", "routes/Admin/Dashboard.tsx"),
-    route("products","routes/Admin/AddProducts.tsx"),
+    route("products","routes/Admin/AdminProducts.tsx"),
+    route("products/:productId","routes/admin/AdminProducts.$productId.tsx"),
     route("categories","routes/Admin/AddCategories.tsx"),
     route("orders","routes/Admin/OrdersAdmin.tsx"),
+    route("products/store","routes/admin/AddProducts.tsx"),
   ]),
 ] satisfies RouteConfig;

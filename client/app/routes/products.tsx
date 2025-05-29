@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { selectAuth } from "~/redux/slices/authSlice";
 import SkeletonCard from "~/components/SkeletonCard";
 import { Skeleton } from "~/components/ui/skeleton";
+import { Combobox } from "~/components/Combobox";
 
 interface Product {
   id: number;
@@ -14,6 +15,10 @@ interface Product {
   image_path: string;
   stock: number;
 }
+interface Category {
+  id: number;
+  name: string;
+}
 
 interface PaginatedProductsResponse {
   data: Product[];
@@ -22,11 +27,14 @@ interface PaginatedProductsResponse {
   current_page: number;
   per_page: number;
 }
-const API_SERVER_URL = "http://localhost:8000"; 
-
+const API_SERVER_URL = "http://localhost:8000";
 
 function Products() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<
+    number | undefined
+  >();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
@@ -35,11 +43,26 @@ function Products() {
   const { isAuthenticated } = useSelector(selectAuth);
 
   useEffect(() => {
+    const fetchCategories = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(`http://localhost:8000/categories`);
+        setCategories(response.data);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+        setError("Не вдалося завантажити категорії. Спробуйте пізніше.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     const fetchProducts = async () => {
       setLoading(true);
       try {
         const response = await axios.get<PaginatedProductsResponse>(
-          `http://localhost:8000/products?page=${currentPage}&per_page=${itemsPerPage}`
+          `http://localhost:8000/products?page=${currentPage}&per_page=${itemsPerPage}&category_id=${
+            selectedCategory || null
+          }`
         );
         setProducts(response.data.data);
         setTotalPages(response.data.total_pages);
@@ -54,7 +77,8 @@ function Products() {
     };
 
     fetchProducts();
-  }, [currentPage, itemsPerPage]);
+    fetchCategories();
+  }, [currentPage, itemsPerPage, selectedCategory]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
@@ -185,6 +209,16 @@ function Products() {
     <div className="py-8 px-4">
       <h1 className="text-3xl font-bold text-center mb-8">Наші Товари</h1>
 
+      <div className="my-2">
+        <Combobox
+          categories={categories}
+          selectedCategoryId={selectedCategory}
+          onCategorySelect={(categoryId) => {
+            setSelectedCategory(categoryId);
+            console.log("Вибрана категорія:", categoryId);
+          }}
+        ></Combobox>
+      </div>
       <div className="relative min-h-[200px]">
         {products.length === 0 && !loading ? (
           <p className="text-center text-gray-500">Товари не знайдено.</p>
