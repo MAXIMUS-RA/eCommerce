@@ -22,12 +22,12 @@ interface CartItemAdd {
 
 interface CartState {
   items: CartItem[];
-  isLoading:boolean;
+  isLoading: boolean;
 }
 
 const initialState: CartState = {
   items: [],
-  isLoading:true,
+  isLoading: true,
 };
 
 export const fetchCart = createAsyncThunk<CartItem[], void>(
@@ -75,7 +75,7 @@ export const removeFromCartAPI = createAsyncThunk<void, { product_id: number }>(
   async ({ product_id }, { dispatch, rejectWithValue }) => {
     try {
       const response = await axios.post(`${API}/cart/remove`, { product_id });
-      dispatch(fetchCart()); 
+      dispatch(fetchCart());
       return response.data;
     } catch (error: any) {
       return rejectWithValue(
@@ -124,12 +124,22 @@ export const cartSlice = createSlice({
 
     updateCart: (
       state,
-      action: PayloadAction<{ id: number; quantity: number }>
+      action: PayloadAction<{ product_id: number; quantity: number }>
     ) => {
-      const item = state.items.find((item) => item.id === action.payload.id);
+      const item = state.items.find(
+        (item) => item.product_id === action.payload.product_id
+      );
       if (item) {
         item.quantity = action.payload.quantity;
+        if (item.quantity <= 0) {
+          state.items = state.items.filter(
+            (i) => i.product_id !== action.payload.product_id
+          );
+        }
       }
+    },
+    setCartItems: (state, action: PayloadAction<CartItem[]>) => {
+      state.items = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -155,7 +165,7 @@ export const cartSlice = createSlice({
         }
       })
       .addCase(removeFromCartAPI.fulfilled, (state, action) => {
-        const productId = action.meta.arg.product_id; 
+        const productId = action.meta.arg.product_id;
         state.items = state.items.filter(
           (item) => item.product_id !== productId
         );
@@ -166,7 +176,8 @@ export const cartSlice = createSlice({
   },
 });
 
-export const { addToCart, removeFromCart, updateCart } = cartSlice.actions;
+export const { addToCart, removeFromCart, updateCart, setCartItems } =
+  cartSlice.actions;
 export const selectCart = (s: RootState) => s.cart;
 
 export default cartSlice.reducer;

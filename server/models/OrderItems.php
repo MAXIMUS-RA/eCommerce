@@ -3,10 +3,6 @@
 class OrderItems extends BaseModel
 {
     protected static string $table = 'orders_items';
-
-    /**
-     * Отримати товари замовлення з деталями продукту
-     */
     public static function getItemsByOrderIdWithProductDetails(int $orderId): array
     {
         if (!isset(static::$pdo) || !(static::$pdo instanceof \PDO)) {
@@ -29,9 +25,7 @@ class OrderItems extends BaseModel
         }
     }
 
-    /**
-     * Знайти товар в замовленні
-     */
+
     public static function findByOrderAndProduct(int $orderId, int $productId): ?array
     {
         if (!isset(static::$pdo) || !(static::$pdo instanceof \PDO)) {
@@ -51,9 +45,7 @@ class OrderItems extends BaseModel
         }
     }
 
-    /**
-     * Видалити всі товари з замовлення
-     */
+
     public static function deleteByOrderId(int $orderId): bool
     {
         if (!isset(static::$pdo) || !(static::$pdo instanceof \PDO)) {

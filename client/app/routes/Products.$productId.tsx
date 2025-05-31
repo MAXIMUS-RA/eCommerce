@@ -123,7 +123,6 @@ function ProductDetailPage() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-8">
-        {/* Product Image */}
         <div className="md:w-1/2">
           <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 border mb-4">
             {product.image_path ? (

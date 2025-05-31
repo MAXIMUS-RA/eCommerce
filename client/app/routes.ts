@@ -14,6 +14,7 @@ export default [
     route("/register", "routes/Register.tsx"),
     route("/cart", "routes/Cart.tsx"),
     route("/profile", "routes/Profile.tsx"),
+    route("/payment/success", "routes/PaymentSuccess.tsx"),
 
   ]),
   route("admin", "./routes/Admin/AdminLayout.tsx", [

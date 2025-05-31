@@ -57,6 +57,9 @@ $staticRoutesConfig = [
         '/categories/store' => ['controller' => 'CategoriesController', 'action' => 'store'],
         '/orders/store' => ['controller' => 'OrdersController', 'action' => 'createFromCart'],
         '/upload/avatar' => ['controller' => 'UsersController', 'action' => 'uploadAvatar'],
+        '/payment/create' => ['controller' => 'PaymentController', 'action' => 'createPayment'],
+        '/payment/callback' => ['controller' => 'PaymentController', 'action' => 'callback'],
+        '/payment/status' => ['controller' => 'PaymentController', 'action' => 'checkStatus'],
     ],
     'PUT' => [
         '/auth/profile' => ['controller' => 'UsersController', 'action' => 'updateProfile'],

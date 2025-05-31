@@ -37,7 +37,7 @@ function Card(props: CardProduct) {
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden max-w-xs w-full flex flex-col h-full">
-      <div className="h-48 w-full overflow-hidden">
+      <div className="h-48 w-full overflow-hidden hover:scale-105 transition-transform duration-300">
         <Link to={`/products/${props.id}`}>
           <img
             src={`${API_SERVER_URL}${props.image}`}

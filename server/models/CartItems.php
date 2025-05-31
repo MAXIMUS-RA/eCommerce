@@ -6,7 +6,6 @@ class CartItems extends BaseModel
 
     public static function findByCartAndProduct(int $cartId, int $productId): ?array
     {
-        // Додана перевірка PDO
         if (!isset(static::$pdo) || !(static::$pdo instanceof \PDO)) {
             error_log("CRITICAL ERROR in " . __METHOD__ . " (CartItems.php): BaseModel::\$pdo is not a valid PDO object.");
             return null;
@@ -20,7 +19,6 @@ class CartItems extends BaseModel
 
     public static function getItemsByCartIdWithProductDetails(int $cartId): array
     {
-        // Додана перевірка PDO
         if (!isset(static::$pdo) || !(static::$pdo instanceof \PDO)) {
             error_log("CRITICAL ERROR in " . __METHOD__ . " (CartItems.php): BaseModel::\$pdo is not a valid PDO object.");
             return []; 
@@ -42,18 +40,15 @@ class CartItems extends BaseModel
 
     public static function updateQuantity(int $cartItemId, int $quantity): bool
     {
-        // Додана перевірка PDO (якщо BaseModel::update не робить цього сам)
         if (!isset(static::$pdo) || !(static::$pdo instanceof \PDO)) {
             error_log("CRITICAL ERROR in " . __METHOD__ . " (CartItems.php): BaseModel::\$pdo is not a valid PDO object for update.");
             return false;
         }
-        // BaseModel::update очікує ID запису та масив даних
         return static::update($cartItemId, ['quantity' => $quantity]);
     }
 
     public static function deleteByCartId(int $cartId): bool
     {
-        // Додана перевірка PDO
         if (!isset(static::$pdo) || !(static::$pdo instanceof \PDO)) {
             error_log("CRITICAL ERROR in " . __METHOD__ . " (CartItems.php): BaseModel::\$pdo is not a valid PDO object for delete.");
             return false;

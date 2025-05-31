@@ -12,6 +12,8 @@ import {
   Calendar,
   MoreHorizontal,
   Badge,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import axios from "axios";
 import {
@@ -69,6 +71,8 @@ function Profile() {
     email: "",
     phone_number: "",
   });
+
+  const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     fetchProfile();
@@ -157,6 +161,16 @@ function Profile() {
     setIsEditing(false);
   };
 
+  const toggleOrderExpansion = (orderId: number) => {
+    const newExpanded = new Set(expandedOrders);
+    if (newExpanded.has(orderId)) {
+      newExpanded.delete(orderId);
+    } else {
+      newExpanded.add(orderId);
+    }
+    setExpandedOrders(newExpanded);
+  };
+
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -197,14 +211,6 @@ function Profile() {
       header: "ID замовлення",
     },
     {
-      accessorKey: "user_email",
-      header: "Користувач",
-      cell: ({ row }) => {
-        const order = row.original;
-        return order.user_email || `ID: ${order.user_id}`;
-      },
-    },
-    {
       accessorKey: "created_at",
       header: "Дата створення",
       cell: ({ row }) => {
@@ -217,7 +223,7 @@ function Profile() {
       header: "Сума",
       cell: ({ row }) => {
         const amount = parseFloat(row.getValue("total_amount"));
-        return `${amount.toFixed(2)} $`;
+        return `${amount.toFixed(2)} ₴`;
       },
     },
     {
@@ -225,15 +231,78 @@ function Profile() {
       header: "Статус",
       cell: ({ row }) => {
         const status = row.getValue("status") as string;
-        return <div className={`${getStatusColor(status)} w-fit p-2`}>{status}</div>
+        return (
+          <div
+            className={`${getStatusColor(
+              status
+            )} w-fit px-3 py-1 rounded-full text-xs font-medium`}
+          >
+            {status}
+          </div>
+        );
       },
     },
     {
       accessorKey: "items",
       header: "Товари",
       cell: ({ row }) => {
-        const items = row.getValue("items") as OrderItem[];
-        return `${items.length} товар(ів)`;
+        const order = row.original;
+        const items = order.items;
+        const isExpanded = expandedOrders.has(order.id);
+
+        return (
+          <div className="space-y-2">
+            <button
+              onClick={() => toggleOrderExpansion(order.id)}
+              className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-800"
+            >
+              <span>{items.length} товар(ів)</span>
+              {isExpanded ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
+            </button>
+
+            {isExpanded && (
+              <div className="space-y-2 mt-2">
+                {items.map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border"
+                  >
+                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                      {item.image_path ? (
+                        <img
+                          src={`http://localhost:8000${item.image_path}`}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                          No img
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {item.name}
+                      </p>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-xs text-gray-600">
+                          {item.quantity} × {item.price} ₴
+                        </span>
+                        <span className="text-sm font-medium text-green-600">
+                          {(item.quantity * item.price)} ₴
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
       },
     },
   ];

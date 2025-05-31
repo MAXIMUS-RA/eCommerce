@@ -23,14 +23,13 @@ class Response
 
     public function send(): void
 {
-    // ✅ ВИПРАВЛЕНО: Додати CORS заголовки
     header('Access-Control-Allow-Origin: http://localhost:5173');
     header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type, Authorization');
     header('Access-Control-Allow-Credentials: true');
 
     if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-        http_response_code(200); // ✅ ВИПРАВЛЕНО: змінено з 204 на 200
+        http_response_code(200); 
         exit;
     }
 
@@ -42,7 +41,6 @@ class Response
         header("{$name}: {$value}", true);
     }
 
-    // ✅ ВИПРАВЛЕНО: Перевіряємо що статус код валідний
     $statusCode = $this->statusCode;
     if ($statusCode < 100 || $statusCode > 599) {
         error_log("Invalid status code: " . $statusCode . ". Using 200 instead.");

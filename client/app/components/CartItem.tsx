@@ -141,7 +141,6 @@ export default function CartItem({
         </div>
       </div>
 
-      {/* Загальна ціна за позицію */}
       <div className="w-full md:w-1/5 text-left md:text-right mb-4 md:mb-0">
         <span className="md:hidden font-semibold mr-2">Total:</span>
         {id ? (
@@ -153,7 +152,6 @@ export default function CartItem({
         )}
       </div>
 
-      {/* Кнопка видалення */}
       <div className="w-full md:w-1/12 text-right">
         <button
           type="button"

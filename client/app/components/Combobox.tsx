@@ -26,8 +26,8 @@ interface CategoryItem {
 
 interface Categories {
   categories: CategoryItem[];
-  onCategorySelect?: (categoryId: number | undefined) => void; // ✅ ДОДАНО: Callback
-  selectedCategoryId?: number; // ✅ ДОДАНО: Вибрана категорія ззовні
+  onCategorySelect?: (categoryId: number | undefined) => void; 
+  selectedCategoryId?: number; 
 }
 
 export function Combobox({

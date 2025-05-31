@@ -82,7 +82,7 @@ class AuthController
             if (session_status() == PHP_SESSION_NONE) {
                 session_start();
             }
-            $_SESSION['user_id'] = $user['id']; // Use 'id' instead of 'user_id'
+            $_SESSION['user_id'] = $user['id'];
             return new Response(['message' => 'Logged in', "user" => $user]);
         }
 
@@ -94,7 +94,7 @@ class AuthController
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
-        $_SESSION = array(); // Очистити масив сесії
+        $_SESSION = array();
 
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();

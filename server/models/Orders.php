@@ -13,7 +13,6 @@ class Orders extends BaseModel
         ]);
 
         if ($orderId && !($orderId instanceof \Core\Response)) {
-            // Копіюємо елементи з кошика в order_items
             foreach ($cartItems as $item) {
                 OrderItems::create([
                     'order_id' => $orderId,
@@ -28,9 +27,7 @@ class Orders extends BaseModel
         return null;
     }
 
-    /**
-     * Отримати всі замовлення користувача
-     */
+
     public static function findAllByUserId(int $userId): array
     {
         if (!isset(static::$pdo) || !(static::$pdo instanceof \PDO)) {

@@ -86,7 +86,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload;
         state.isAuthenticated = !!action.payload;
-        state.isAdministrator = action.payload ? action.payload.isAdmin : false; // Додано перевірку
+        state.isAdministrator = action.payload ? action.payload.isAdmin : false;
       })
       .addCase(fetchCurrentUser.rejected, (state) => {
         state.loading = false;
@@ -94,7 +94,7 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.isAdministrator = false;
       })
-      // login
+
       .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -103,7 +103,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload;
         state.isAuthenticated = true;
-        state.isAdministrator = action.payload ? action.payload.isAdmin : false; // Додано перевірку
+        state.isAdministrator = action.payload ? action.payload.isAdmin : false;
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
@@ -111,7 +111,7 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.isAdministrator = false;
       })
-      // register
+
       .addCase(register.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -120,7 +120,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload;
         state.isAuthenticated = true;
-        state.isAdministrator = action.payload ? action.payload.isAdmin : false; // Додано перевірку
+        state.isAdministrator = action.payload ? action.payload.isAdmin : false;
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
@@ -128,7 +128,7 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.isAdministrator = false;
       })
-      // logout
+
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.isAuthenticated = false;

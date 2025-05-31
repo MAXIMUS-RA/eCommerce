@@ -27,7 +27,6 @@ interface PaginatedProductsResponse {
   current_page: number;
   per_page: number;
 }
-const API_SERVER_URL = "http://localhost:8000";
 
 function Products() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -114,7 +113,7 @@ function Products() {
         <button
           key={1}
           onClick={() => handlePageChange(1)}
-          className={`px-3 py-1 mx-1 border rounded ${
+          className={`px-3 py-1 mx-1 border rounded duration-300 hover:bg-indigo-200 ${
             1 === currentPage
               ? "bg-indigo-600 text-white"
               : "bg-white text-indigo-600 hover:bg-indigo-50"
@@ -138,7 +137,7 @@ function Products() {
           key={i}
           onClick={() => handlePageChange(i)}
           disabled={loading && i === currentPage}
-          className={`px-3 py-1 mx-1 border rounded ${
+          className={`px-3 py-1 mx-1 border rounded duration-300 hover:bg-indigo-200 ${
             i === currentPage
               ? "bg-indigo-600 text-white cursor-default"
               : "bg-white text-indigo-600 hover:bg-indigo-50"
@@ -247,7 +246,7 @@ function Products() {
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1 || loading}
-            className="px-4 py-2 mx-1 border rounded-2xl bg-white text-indigo-600 duration-300 hover:bg-indigo-200 disabled:opacity-50 cursor-pointer"
+            className="px-4 py-2 mx-1 border rounded-2xl bg-white text-indigo-600 duration-300 hover:bg-indigo-200 disabled:opacity-50 cursor-pointer "
           >
             Попередня
           </button>

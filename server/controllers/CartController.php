@@ -14,7 +14,7 @@ class CartController
 
     private function getAuthenticatedUserId(): ?int
     {
-        AuthMiddleware::checkAuthenticated(); 
+        AuthMiddleware::checkAuthenticated();
         return $_SESSION['user_id'] ?? null;
     }
 
@@ -40,7 +40,7 @@ class CartController
     public function addItem()
     {
         $userId = $this->getAuthenticatedUserId();
-        if (!$userId) return new Response(['error' => 'User not authenticated.'], 401); // Додаткова перевірка
+        if (!$userId) return new Response(['error' => 'User not authenticated.'], 401);
 
         $cart = $this->getUserCart($userId);
         if (!$cart) {
@@ -56,7 +56,7 @@ class CartController
             return new Response(['error' => 'Product ID and valid quantity are required.'], 400);
         }
 
-        $product = Product::find($productId); // Припускаємо, що модель Product існує
+        $product = Product::find($productId);
         if (!$product) {
             return new Response(['error' => 'Product not found.'], 404);
         }
@@ -81,7 +81,7 @@ class CartController
                 'quantity' => $quantity,
             ]);
         }
-        return $this->viewCart(); // Повертаємо оновлений кошик
+        return $this->viewCart();
     }
 
     public function updateItem()
@@ -115,7 +115,7 @@ class CartController
             Product::update($productId, ['stock' => $newStock]);
         }
         if ($newQuantity <= 0) {
-            CartItems::delete($cartItem['id']); // Використовуємо BaseModel::delete
+            CartItems::delete($cartItem['id']);
         } else {
             CartItems::updateQuantity($cartItem['id'], $newQuantity);
         }
@@ -151,7 +151,7 @@ class CartController
         }
 
 
-        CartItems::delete($cartItem['id']); // Використовуємо BaseModel::delete
+        CartItems::delete($cartItem['id']);
         return $this->viewCart();
     }
 
@@ -166,7 +166,7 @@ class CartController
 
 
         if (!$cart) {
-            // Якщо кошика немає, повертаємо порожній кошик
+
             return new Response([
                 'message' => 'Cart is empty.',
                 'cart_items' => [],
@@ -182,10 +182,10 @@ class CartController
         $totalItemsCount = 0;
         if (is_array($itemsWithDetails)) {
             foreach ($itemsWithDetails as $item) {
-                // Використовуємо 'current_price' замість 'price_at_addition'
+
                 $currentPrice = $item['current_price'] ?? 0;
                 $quantity = $item['quantity'] ?? 0;
-                $totalPrice += $currentPrice * $quantity; // Змінено тут
+                $totalPrice += $currentPrice * $quantity;
                 $totalItemsCount += $quantity;
             }
         }
@@ -208,7 +208,7 @@ class CartController
         if ($cart) {
             CartItems::deleteByCartId($cart['id']);
         }
-        // Навіть якщо кошика не було, або він тепер порожній, повертаємо успішну відповідь
+
         return new Response(['message' => 'Cart cleared successfully.', 'cart_items' => []]);
     }
 }
