@@ -15,6 +15,7 @@ class ProductsController
         $page = (int)($_GET['page'] ?? 1);
         $perPage = (int)($_GET['per_page'] ?? 10);
         $categoryId = $_GET['category_id'] ?? null;
+        $sortBy = $_GET['sort_by'] ?? null;
 
         if ($categoryId === 'null' || $categoryId === '' || $categoryId === null) {
             $categoryId = null;
@@ -22,7 +23,7 @@ class ProductsController
             $categoryId = is_numeric($categoryId) ? (int)$categoryId : null;
         }
 
-        $result = Product::paginate($page, $perPage, $categoryId);
+        $result = Product::paginate($page, $perPage, $categoryId,$sortBy);
 
         if (empty($result)) {
             return new Response([

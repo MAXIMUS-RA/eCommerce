@@ -33,6 +33,7 @@ class OrdersController
         if (empty($cartItems)) {
             return new Response(['error' => 'Cart is empty.'], 400);
         }
+        var_dump($cartItems);
 
         foreach ($cartItems as $item) {
             $product = Product::find($item['product_id']);

@@ -67,7 +67,7 @@ export function Combobox({
         >
           {value
             ? categories?.find((category) => category.id === value)?.name
-            : "Виберіть категорію сортування..."}
+            : "Виберіть категорію ..."}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>

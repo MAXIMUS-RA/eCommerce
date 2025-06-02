@@ -17,7 +17,7 @@ abstract class BaseModel
         $stmt = static::$pdo->query("SELECT * FROM " . static::$table);
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
-    public static function paginate(int $page = 1, int $perPage = 10, $categoryId = null): array
+    public static function paginate(int $page = 1, int $perPage = 10, $categoryId = null, $sortBy = null): array
     {
         if (!isset(static::$pdo) || !(static::$pdo instanceof \PDO)) {
             error_log("CRITICAL ERROR in " . __METHOD__ . " (BaseModel.php): BaseModel::\$pdo is not a valid PDO object.");
@@ -56,7 +56,10 @@ abstract class BaseModel
 
         $offset = ($page - 1) * $perPage;
 
-        $sql = "SELECT * FROM " . static::$table . $whereClause . " ORDER BY name ASC LIMIT :limit OFFSET :offset";
+        // Додаємо логіку сортування
+        $orderClause = static::buildOrderClause($sortBy);
+        
+        $sql = "SELECT * FROM " . static::$table . $whereClause . $orderClause . " LIMIT :limit OFFSET :offset";
 
         try {
             $stmt = static::$pdo->prepare($sql);
@@ -83,6 +86,30 @@ abstract class BaseModel
             error_log("PDOException in " . __METHOD__ . " (fetching data): " . $e->getMessage());
             return [];
         }
+    }
+
+    // Додаємо новий метод для обробки сортування
+    protected static function buildOrderClause($sortBy): string
+    {
+        if (!$sortBy) {
+            return " ORDER BY name ASC"; // Сортування за замовчуванням
+        }
+
+        $validSortOptions = [
+            'price_asc' => 'price ASC',
+            'price_desc' => 'price DESC',
+            'name_asc' => 'name ASC',
+            'name_desc' => 'name DESC',
+            'created_desc' => 'created_at DESC',
+            'created_asc' => 'created_at ASC'
+        ];
+
+        if (isset($validSortOptions[$sortBy])) {
+            return " ORDER BY " . $validSortOptions[$sortBy];
+        }
+
+        // Якщо переданий невідомий параметр сортування, використовуємо за замовчуванням
+        return " ORDER BY name ASC";
     }
 
     static function find(int $id): ?array

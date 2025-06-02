@@ -6,6 +6,7 @@ import { selectAuth } from "~/redux/slices/authSlice";
 import SkeletonCard from "~/components/SkeletonCard";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Combobox } from "~/components/Combobox";
+import { SortCombox, type SortByType } from "~/components/SortCombox";
 
 interface Product {
   id: number;
@@ -27,22 +28,18 @@ interface PaginatedProductsResponse {
   current_page: number;
   per_page: number;
 }
-
+ 
 function Products() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<
-    number | undefined
-  >();
+  const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { isAuthenticated } = useSelector(selectAuth);
-  const [sortBy, setSortBy] = useState<
-    "priceAsc" | "priceDesc" | "nameAsc" | "nameDesc"
-  >("nameAsc");
+  const [sortBy, setSortBy] = useState<SortByType>(undefined);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -61,11 +58,24 @@ function Products() {
     const fetchProducts = async () => {
       setLoading(true);
       try {
+        // Формуємо URL з параметрами
+        const params = new URLSearchParams({
+          page: currentPage.toString(),
+          per_page: itemsPerPage.toString(),
+        });
+
+        if (selectedCategory) {
+          params.append("category_id", selectedCategory.toString());
+        }
+
+        if (sortBy) {
+          params.append("sort_by", sortBy);
+        }
+
         const response = await axios.get<PaginatedProductsResponse>(
-          `http://localhost:8000/products?page=${currentPage}&per_page=${itemsPerPage}&category_id=${
-            selectedCategory || null
-          }`
+          `http://localhost:8000/products?${params.toString()}`
         );
+
         setProducts(response.data.data);
         setTotalPages(response.data.total_pages);
         setCurrentPage(response.data.current_page);
@@ -80,7 +90,7 @@ function Products() {
 
     fetchProducts();
     fetchCategories();
-  }, [currentPage, itemsPerPage, selectedCategory]);
+  }, [currentPage, itemsPerPage, selectedCategory, sortBy]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
@@ -217,24 +227,20 @@ function Products() {
             selectedCategoryId={selectedCategory}
             onCategorySelect={(categoryId) => {
               setSelectedCategory(categoryId);
+              setCurrentPage(1);
               console.log("Вибрана категорія:", categoryId);
             }}
-          ></Combobox>
+          />
         </div>
         <div className="my-2">
-          <div className="flex gap-4 mb-6">
-            <select
-              value={sortBy}
-              onChange={(e) =>
-                setSortBy(e.target.value as "nameAsc" |  "nameDesc" | "priceAsc" | "priceDesc")
-              }
-              className="px-3 py-2 border border-gray-300 rounded-md"
-            >
-              <option value="name">За назвою</option>
-              <option value="price">За ціною</option>
-              <option value="created_at">За датою додавання</option>
-            </select>
-          </div>
+          <SortCombox
+            onSortSelect={(sortOption) => {
+              setSortBy(sortOption);
+              setCurrentPage(1);
+              console.log("Selected sort:", sortOption);
+            }}
+            selectedSortOption={sortBy}
+          />
         </div>
       </div>
       <div className="relative min-h-[200px]">
