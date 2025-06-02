@@ -1,6 +1,4 @@
-import type { Route } from "./+types/Home";
-
-export default function Home() {
+export default function About() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-12">
@@ -62,7 +60,8 @@ export default function Home() {
                 Якісні товари
               </h3>
               <p className="text-gray-600">
-                Тільки перевірені та сертифіковані товари від українських та світових брендів
+                Тільки перевірені та сертифіковані товари від українських та
+                світових брендів
               </p>
             </div>
 
@@ -113,7 +112,7 @@ export default function Home() {
                 </div>
                 <div className="flex-1">
                   <p className="text-lg md:text-2xl text-gray-600 leading-relaxed">
-                    Підтримувати українських споживачів та бізнес у їх розвитку, 
+                    Підтримувати українських споживачів та бізнес у їх розвитку,
                     надаючи доступ до найкращих товарів та послуг в інтернеті.
                   </p>
                 </div>
@@ -127,8 +126,9 @@ export default function Home() {
                 </div>
                 <div className="flex-1">
                   <p className="text-lg md:text-2xl text-gray-600 leading-relaxed">
-                    Наша головна експертиза полягає в розумінні потреб українського 
-                    ринку та забезпеченні клієнтів найкращими рішеннями для онлайн-покупок.
+                    Наша головна експертиза полягає в розумінні потреб
+                    українського ринку та забезпеченні клієнтів найкращими
+                    рішеннями для онлайн-покупок.
                   </p>
                 </div>
               </div>
@@ -141,8 +141,9 @@ export default function Home() {
                 </div>
                 <div className="flex-1">
                   <p className="text-lg md:text-2xl text-gray-600 leading-relaxed">
-                    Роки досвіду роботи з українськими покупцями - від приватних осіб 
-                    до великих корпорацій, розуміння потреб кожного клієнта.
+                    Роки досвіду роботи з українськими покупцями - від приватних
+                    осіб до великих корпорацій, розуміння потреб кожного
+                    клієнта.
                   </p>
                 </div>
               </div>
@@ -155,7 +156,7 @@ export default function Home() {
                 </div>
                 <div className="flex-1">
                   <p className="text-lg md:text-2xl text-gray-600 leading-relaxed">
-                    Найкраще поєднання сучасних технологій та людського підходу 
+                    Найкраще поєднання сучасних технологій та людського підходу
                     для максимального комфорту наших клієнтів.
                   </p>
                 </div>
@@ -164,15 +165,18 @@ export default function Home() {
           </div>
         </div>
       </div>
-      
+
       <footer className="bg-white text-gray-800 mt-20 w-full border-t border-gray-200">
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="space-y-4">
-              <h3 className="text-xl font-bold text-blue-600">eCommerce Ukraine</h3>
+              <h3 className="text-xl font-bold text-blue-600">
+                eCommerce Ukraine
+              </h3>
               <p className="text-gray-600">
-                Ваш надійний партнер для онлайн покупок в Україні. Якісні товари, 
-                швидка доставка по всій країні та відмінний сервіс українською мовою.
+                Ваш надійний партнер для онлайн покупок в Україні. Якісні
+                товари, швидка доставка по всій країні та відмінний сервіс
+                українською мовою.
               </p>
               <div className="flex space-x-4">
                 <a

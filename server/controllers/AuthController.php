@@ -73,7 +73,6 @@ class AuthController
         $user = Users::getByEmail($email);
         var_dump($user);
 
-        // Check if user was found
         if (!$user) {
             return new Response(['error' => 'Invalid credentials'], 401);
         }

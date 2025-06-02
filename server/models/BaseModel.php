@@ -56,7 +56,7 @@ abstract class BaseModel
 
         $offset = ($page - 1) * $perPage;
 
-        $sql = "SELECT * FROM " . static::$table . $whereClause . " ORDER BY created_at DESC LIMIT :limit OFFSET :offset";
+        $sql = "SELECT * FROM " . static::$table . $whereClause . " ORDER BY name ASC LIMIT :limit OFFSET :offset";
 
         try {
             $stmt = static::$pdo->prepare($sql);

@@ -25,7 +25,7 @@ interface CategoryItem {
 }
 
 interface Categories {
-  categories: CategoryItem[];
+  categories?: CategoryItem[];
   onCategorySelect?: (categoryId: number | undefined) => void; 
   selectedCategoryId?: number; 
 }
@@ -66,8 +66,8 @@ export function Combobox({
           className="w-[200px] justify-between"
         >
           {value
-            ? categories.find((category) => category.id === value)?.name
-            : "Виберіть категорію..."}
+            ? categories?.find((category) => category.id === value)?.name
+            : "Виберіть категорію сортування..."}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -77,7 +77,7 @@ export function Combobox({
           <CommandList>
             <CommandEmpty>Категорія не знайдена.</CommandEmpty>
             <CommandGroup>
-              {categories.map((category) => (
+              {categories?.map((category) => (
                 <CommandItem
                   key={category.id}
                   value={category.name}

@@ -46,7 +46,7 @@ function Header({ isAuthenticated, user, onLogout, isAdmin }: HeaderProps) {
               to="/"
               className="px-3 py-2 rounded text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition"
             >
-              Home
+              About
             </Link>
           </li>
           <li>

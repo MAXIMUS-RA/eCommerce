@@ -40,6 +40,9 @@ function Products() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { isAuthenticated } = useSelector(selectAuth);
+  const [sortBy, setSortBy] = useState<
+    "priceAsc" | "priceDesc" | "nameAsc" | "nameDesc"
+  >("nameAsc");
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -207,16 +210,32 @@ function Products() {
   return (
     <div className="py-8 px-4">
       <h1 className="text-3xl font-bold text-center mb-8">Наші Товари</h1>
-
-      <div className="my-2">
-        <Combobox
-          categories={categories}
-          selectedCategoryId={selectedCategory}
-          onCategorySelect={(categoryId) => {
-            setSelectedCategory(categoryId);
-            console.log("Вибрана категорія:", categoryId);
-          }}
-        ></Combobox>
+      <div className="flex gap-5 my-2">
+        <div className="my-2">
+          <Combobox
+            categories={categories}
+            selectedCategoryId={selectedCategory}
+            onCategorySelect={(categoryId) => {
+              setSelectedCategory(categoryId);
+              console.log("Вибрана категорія:", categoryId);
+            }}
+          ></Combobox>
+        </div>
+        <div className="my-2">
+          <div className="flex gap-4 mb-6">
+            <select
+              value={sortBy}
+              onChange={(e) =>
+                setSortBy(e.target.value as "nameAsc" |  "nameDesc" | "priceAsc" | "priceDesc")
+              }
+              className="px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="name">За назвою</option>
+              <option value="price">За ціною</option>
+              <option value="created_at">За датою додавання</option>
+            </select>
+          </div>
+        </div>
       </div>
       <div className="relative min-h-[200px]">
         {products.length === 0 && !loading ? (
