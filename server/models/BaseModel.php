@@ -56,9 +56,8 @@ abstract class BaseModel
 
         $offset = ($page - 1) * $perPage;
 
-        // Додаємо логіку сортування
         $orderClause = static::buildOrderClause($sortBy);
-        
+
         $sql = "SELECT * FROM " . static::$table . $whereClause . $orderClause . " LIMIT :limit OFFSET :offset";
 
         try {
@@ -88,11 +87,10 @@ abstract class BaseModel
         }
     }
 
-    // Додаємо новий метод для обробки сортування
     protected static function buildOrderClause($sortBy): string
     {
         if (!$sortBy) {
-            return " ORDER BY name ASC"; // Сортування за замовчуванням
+            return " ORDER BY name ASC";
         }
 
         $validSortOptions = [
@@ -108,7 +106,6 @@ abstract class BaseModel
             return " ORDER BY " . $validSortOptions[$sortBy];
         }
 
-        // Якщо переданий невідомий параметр сортування, використовуємо за замовчуванням
         return " ORDER BY name ASC";
     }
 
@@ -152,7 +149,6 @@ abstract class BaseModel
             return (int) static::$pdo->lastInsertId();
         } catch (\PDOException $e) {
             error_log("DB CREATE ERROR: " . $e->getMessage());
-            // Повертаємо Response з помилкою
             return new \Core\Response(['error' => 'Database error during user creation.', 'details' => $e->getMessage()], 500);
         }
     }

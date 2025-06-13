@@ -36,20 +36,28 @@ class PaymentController
         $userId = $this->getAuthenticatedUserId();
         if (!$userId) return new Response(['error' => 'User not authenticated.'], 401);
 
-        $input = json_decode(file_get_contents('php://input'), true);
+        $rawInput = file_get_contents('php://input');
+        error_log("Raw input data: " . $rawInput);
+
+        $input = json_decode($rawInput, true);
+        error_log("Parsed input data: " . print_r($input, true));
+
         $orderId = $input['order_id'] ?? null;
+        error_log("Order ID from input: " . ($orderId ?? 'NULL'));
 
         if (!$orderId) {
+            error_log("Order ID is missing from request");
             return new Response(['error' => 'Order ID is required'], 400);
         }
 
         $order = Orders::find($orderId);
         if (!$order) {
+            error_log("Order not found for ID: " . $orderId);
             return new Response(['error' => 'Order not found'], 404);
         }
 
-
         if ($order['user_id'] != $userId) {
+            error_log("Access denied for user {$userId} to order {$orderId}");
             return new Response(['error' => 'Access denied'], 403);
         }
 
@@ -65,7 +73,7 @@ class PaymentController
             'version'        => 3,
             'language'       => $this->config['language'],
             'result_url'     => $this->config['success_url'],
-            'server_url'     => 'https://791b-109-251-239-20.ngrok-free.app/payment/callback',
+            'server_url'     => 'https://f21b-109-251-239-20.ngrok-free.app/payment/callback',
             'sandbox'        => 1,
         ];
 

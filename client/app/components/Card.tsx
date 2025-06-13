@@ -11,14 +11,13 @@ interface CardProduct {
   image: string;
   price: number;
   stock: number;
-  isAuthenticated:boolean
-  
+  isAuthenticated: boolean;
 }
-const API_SERVER_URL = "http://localhost:8000"; 
+const API_SERVER_URL = "http://localhost:8000";
 
 function Card(props: CardProduct) {
   const dispatch = useDispatch<AppDispatch>();
-  const {isAuthenticated} = useSelector(selectAuth);
+  const { isAuthenticated } = useSelector(selectAuth);
   const navigate = useNavigate();
 
   const handleAdd = () => {
@@ -42,7 +41,7 @@ function Card(props: CardProduct) {
           <img
             src={`${API_SERVER_URL}${props.image}`}
             alt={props.name}
-            className="object-cover w-full h-full"
+            className="object-contain w-full h-full"
           />
         </Link>
       </div>
@@ -50,25 +49,31 @@ function Card(props: CardProduct) {
       <div className="p-4 flex flex-col flex-grow">
         <div className="flex-grow mb-4">
           <span className="block text-lg font-semibold mb-1">{props.name}</span>
-          <span className="block text-gray-600 text-sm leading-relaxed">
+          <span className="block text-gray-600 text-sm leading-relaxed truncate">
             {props.description}
           </span>
         </div>
-
-        <div>
-          <span className="block text-xl font-bold text-green-600 mb-3">
-            ${props.price}
-          </span>
+        <div className="mt-auto p-4 bg-gray-50 rounded-b-lg">
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-xl font-bold text-green-700">
+              ${props.price}
+            </span>
+            {props.stock <= 10 && (
+              <span className="px-2 py-1 text-xs font-semibold uppercase bg-amber-100 text-amber-800 rounded-full animate-pulse">
+                Закінчується
+              </span>
+            )}
+          </div>
           <button
             onClick={handleAdd}
-            className="w-full px-4 py-2 border rounded-lg bg-indigo-600 text-white text-sm font-medium duration-300 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 disabled:opacity-50"
             disabled={props.stock <= 0}
+            className="w-full py-2 bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white font-semibold uppercase rounded-lg shadow-md transition-transform transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {props.stock > 0 ? "Додати в кошик" : "Немає в наявності"}
           </button>
         </div>
+        </div>
       </div>
-    </div>
   );
 }
 

@@ -153,11 +153,9 @@ class UsersController
             return new Response(['error' => 'User not found.'], 404);
         }
 
-        // Видаляємо чутливі дані
         unset($user['password']);
         unset($user['remember_token']);
 
-        // Додаємо повний URL для аватара
         if (!empty($user['avatar'])) {
             $user['avatar_url'] = 'http://localhost:8000' . $user['avatar'];
         } else {

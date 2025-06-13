@@ -35,7 +35,7 @@ function Products() {
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(8);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { isAuthenticated } = useSelector(selectAuth);
@@ -58,7 +58,6 @@ function Products() {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        // Формуємо URL з параметрами
         const params = new URLSearchParams({
           page: currentPage.toString(),
           per_page: itemsPerPage.toString(),

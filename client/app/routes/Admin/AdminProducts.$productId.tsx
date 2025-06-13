@@ -150,6 +150,7 @@ function AdminProductUpdate() {
     );
   }
 
+
   if (error && !product) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -169,7 +170,6 @@ function AdminProductUpdate() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        {/* ✅ ВИПРАВЛЕНО: Динамічний заголовок */}
         <h1 className="text-2xl font-semibold text-gray-700">
           {product ? `Редагувати товар: ${product.name}` : "Завантаження..."}
         </h1>
@@ -193,6 +193,7 @@ function AdminProductUpdate() {
           />
         </div>
       )}
+
 
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">{error}</div>
@@ -244,6 +245,7 @@ function AdminProductUpdate() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               ></textarea>
             </div>
+            
 
             <div className="mb-4">
               <label

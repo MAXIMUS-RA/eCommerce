@@ -33,16 +33,6 @@ class OrdersController
         if (empty($cartItems)) {
             return new Response(['error' => 'Cart is empty.'], 400);
         }
-        var_dump($cartItems);
-
-        foreach ($cartItems as $item) {
-            $product = Product::find($item['product_id']);
-            if (!$product || $product['stock'] < $item['quantity']) {
-                return new Response([
-                    'error' => "Недостатньо товару '{$item['name']}' на складі."
-                ], 400);
-            }
-        }
 
         $totalAmount = 0.00;
         foreach ($cartItems as $item) {
@@ -52,14 +42,6 @@ class OrdersController
         $orderId = Orders::createFromCart($userId, $cartItems, $totalAmount);
         if (!$orderId) {
             return new Response(['error' => 'Failed to create order.'], 500);
-        }
-
-        foreach ($cartItems as $item) {
-            $product = Product::find($item['product_id']);
-            if ($product) {
-                $newStock = $product['stock'] - $item['quantity'];
-                Product::update($item['product_id'], ['stock' => $newStock]);
-            }
         }
 
         CartItems::deleteByCartId($cartId);

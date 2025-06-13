@@ -56,7 +56,7 @@ class Router
             }
 
             $this->handleNotFound($uri, $requestMethod);
-        } catch (\Throwable $e) { // Catching Throwable for broader error handling
+        } catch (\Throwable $e) { 
             $this->handleError($e);
         }
     }

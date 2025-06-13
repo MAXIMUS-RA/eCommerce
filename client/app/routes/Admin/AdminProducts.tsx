@@ -81,7 +81,6 @@ function AdminProducts() {
       header: "Опис",
       cell: ({ row }) => {
         const product = row.original;
-        // ✅ КРАЩИЙ варіант: Безпечна перевірка
         const description = product.description?.trim() || "Без опису";
 
         return (

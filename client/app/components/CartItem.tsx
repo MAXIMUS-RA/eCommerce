@@ -8,7 +8,7 @@ import {
 } from "~/redux/slices/cartSlice";
 import type { AppDispatch } from "~/redux/store";
 
-const API_SERVER_URL = "http://localhost:8000"; 
+const API_SERVER_URL = "http://localhost:8000";
 
 interface CartItemProps {
   id: number;
@@ -17,7 +17,7 @@ interface CartItemProps {
   description?: string;
   price: number;
   quantity: number;
-  product_id:number
+  product_id: number;
 }
 
 export default function CartItem({
@@ -30,8 +30,13 @@ export default function CartItem({
   product_id,
 }: CartItemProps) {
   const dispatch = useDispatch<AppDispatch>();
-  console.log(image_path);
-  
+
+  const truncateText = (text: string, maxLength: number = 50) => {
+    if (!text) return "Немає опису";
+    return text.length > maxLength
+      ? `${text.substring(0, maxLength)}...`
+      : text;
+  };
 
   return (
     <div className="flex flex-col md:flex-row items-center px-6 py-4 border-b border-gray-200">
@@ -41,15 +46,16 @@ export default function CartItem({
           alt={name || "Product image"}
           className="w-16 h-16 object-cover rounded mr-4 flex-shrink-0"
         />
-        <div>
+        <div className="flex-1 min-w-0">
           <a
-            href={`/products/${id}`}
-            className="text-lg font-semibold text-gray-800 hover:text-indigo-600"
+            href={`/products/${product_id}`}
+            className="text-lg font-semibold text-gray-800 hover:text-indigo-600 block truncate"
+            title={name}
           >
-            {name || "Unknown Product"}
+            {truncateText(name, 30)}
           </a>
-          <p className="text-sm text-gray-500">
-            <span className="font-bold">Description:</span> {description}
+          <p className="text-sm text-gray-500 mt-1" title={description}>
+            {truncateText(description || "", 40)}
           </p>
         </div>
         {!id && (
@@ -61,29 +67,32 @@ export default function CartItem({
           </>
         )}
       </div>
+
       <div className="w-full md:w-1/5 text-left md:text-center mb-2 md:mb-0">
-        <span className="md:hidden font-semibold mr-2">Price:</span>
+        <span className="md:hidden font-semibold mr-2">Ціна:</span>
         {id ? (
-          <span className="text-gray-700">${price}</span>
+          <span className="text-gray-700 font-medium">₴{price}</span>
         ) : (
           <span className="text-gray-500">N/A</span>
         )}
       </div>
 
       <div className="w-full md:w-1/5 flex items-center justify-start md:justify-center mb-4 md:mb-0">
-        <span className="md:hidden font-semibold mr-2">Quantity:</span>
+        <span className="md:hidden font-semibold mr-2">Кількість:</span>
         <div className="flex items-center">
           <button
             type="button"
-            className="text-gray-500 duration-300 rounded-4xl hover:text-gray-700 p-1 hover:bg-gray-300 disabled:opacity-50 "
+            className="text-gray-500 duration-300 rounded hover:text-gray-700 p-2 hover:bg-gray-100 disabled:opacity-50"
+            disabled={quantity <= 1}
             onClick={() => {
-              // Decrease quantity logic here
-              dispatch(
-                updateCartAPI({
-                  product_id: product_id,
-                  quantity: quantity - 1,
-                })
-              );
+              if (quantity > 1) {
+                dispatch(
+                  updateCartAPI({
+                    product_id: product_id,
+                    quantity: quantity - 1,
+                  })
+                );
+              }
             }}
           >
             <svg
@@ -99,20 +108,22 @@ export default function CartItem({
                 strokeWidth="2.5"
                 stroke="currentColor"
                 d="M20 12L4 12"
-              ></path>
+              />
             </svg>
           </button>
+
           <input
             type="number"
             name="quantity"
             value={quantity}
-            className="mx-2 w-12 text-center border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+            className="mx-2 w-16 text-center border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
             min={1}
             readOnly
           />
+
           <button
             type="button"
-            className="text-gray-500 duration-300 rounded-4xl hover:text-gray-700 p-1 hover:bg-gray-300 disabled:opacity-50 "
+            className="text-gray-500 duration-300 rounded hover:text-gray-700 p-2 hover:bg-gray-100"
             onClick={() => {
               dispatch(
                 updateCartAPI({
@@ -135,17 +146,17 @@ export default function CartItem({
                 strokeWidth="2.5"
                 stroke="currentColor"
                 d="M12 4V20M20 12H4"
-              ></path>
+              />
             </svg>
           </button>
         </div>
       </div>
 
       <div className="w-full md:w-1/5 text-left md:text-right mb-4 md:mb-0">
-        <span className="md:hidden font-semibold mr-2">Total:</span>
+        <span className="md:hidden font-semibold mr-2">Сума:</span>
         {id ? (
-          <span className="font-semibold text-gray-900">
-            ${((quantity ?? 1) * (price ?? 0)).toFixed(2)}
+          <span className="font-semibold text-gray-900 text-lg">
+            ₴{((quantity ?? 1) * (price ?? 0)).toFixed(2)}
           </span>
         ) : (
           <span className="text-gray-500">N/A</span>
@@ -155,11 +166,11 @@ export default function CartItem({
       <div className="w-full md:w-1/12 text-right">
         <button
           type="button"
-          className="text-red-500 hover:text-red-700"
-          title="Remove item"
+          className="text-red-500 hover:text-red-700 p-2 rounded hover:bg-red-50 transition-colors"
+          title="Видалити товар"
           onClick={() => {
             if (id !== undefined && id !== null) {
-              dispatch(removeFromCartAPI( {product_id} ));
+              dispatch(removeFromCartAPI({ product_id }));
             } else {
               console.error("Cannot remove item: invalid ID");
             }
